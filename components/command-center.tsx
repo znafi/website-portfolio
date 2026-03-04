@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
-  Command,
   FolderOpen,
   Github,
   ExternalLink,
@@ -12,6 +11,7 @@ import {
   Zap,
   Code2,
   ArrowRight,
+  Search,
 } from "lucide-react"
 
 interface CommandItem {
@@ -41,7 +41,7 @@ export function CommandCenter() {
     },
     {
       id: "about",
-      label: "About the Developer",
+      label: "About",
       description: "Learn more about me",
       icon: User,
       action: () => scrollTo("about"),
@@ -49,8 +49,8 @@ export function CommandCenter() {
     },
     {
       id: "skills",
-      label: "View Skills",
-      description: "See my tech stack",
+      label: "Tech Stack",
+      description: "See my technologies",
       icon: Code2,
       action: () => scrollTo("skills"),
       category: "Navigate",
@@ -58,7 +58,7 @@ export function CommandCenter() {
     {
       id: "founder",
       label: "ZStudios Agency",
-      description: "Learn about my agency",
+      description: "My digital agency",
       icon: Zap,
       action: () => scrollTo("founder"),
       category: "Navigate",
@@ -66,7 +66,7 @@ export function CommandCenter() {
     {
       id: "github-section",
       label: "GitHub Stats",
-      description: "View my open source activity",
+      description: "Open-source activity",
       icon: Github,
       action: () => scrollTo("github"),
       category: "Navigate",
@@ -90,7 +90,7 @@ export function CommandCenter() {
     {
       id: "contact",
       label: "Contact",
-      description: "Get in touch with me",
+      description: "Get in touch",
       icon: Mail,
       action: () => scrollTo("contact"),
       category: "Links",
@@ -151,16 +151,13 @@ export function CommandCenter() {
   }, [handleKeyDown])
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus()
-    }
+    if (isOpen && inputRef.current) inputRef.current.focus()
   }, [isOpen])
 
   useEffect(() => {
     setSelectedIndex(0)
   }, [query])
 
-  // Group commands by category
   const grouped = filtered.reduce<Record<string, CommandItem[]>>((acc, cmd) => {
     if (!acc[cmd.category]) acc[cmd.category] = []
     acc[cmd.category].push(cmd)
@@ -171,60 +168,59 @@ export function CommandCenter() {
 
   return (
     <>
-      {/* Floating trigger button */}
+      {/* Floating trigger */}
       <button
         onClick={() => {
           setIsOpen(true)
           setQuery("")
           setSelectedIndex(0)
         }}
-        className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_0_30px_rgba(0,200,200,0.3)] transition-all hover:scale-110 hover:shadow-[0_0_40px_rgba(0,200,200,0.5)] md:bottom-8 md:right-8 md:h-14 md:w-14"
+        className="fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background text-foreground transition-all hover:border-foreground/30 md:bottom-8 md:right-8"
         aria-label="Open command center"
       >
-        <Terminal className="h-5 w-5 md:h-6 md:w-6" />
+        <Terminal className="h-4 w-4" />
       </button>
 
       {/* Keyboard hint */}
-      <div className="fixed bottom-6 right-22 z-50 hidden items-center gap-1.5 rounded-lg border border-border bg-card/80 px-3 py-2 backdrop-blur-sm md:bottom-8 md:right-26 md:flex">
-        <span className="text-xs text-muted-foreground">Press</span>
-        <kbd className="rounded border border-border bg-secondary px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+      <div className="fixed bottom-6 right-20 z-50 hidden items-center gap-1.5 md:bottom-8 md:right-22 md:flex">
+        <span className="text-[10px] text-muted-foreground/50">Press</span>
+        <kbd className="rounded border border-border bg-secondary px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground/60">
           /
         </kbd>
-        <span className="text-xs text-muted-foreground">to navigate</span>
       </div>
 
       {/* Overlay */}
       {isOpen && (
         <div
           ref={overlayRef}
-          className="fixed inset-0 z-[100] flex items-start justify-center bg-background/70 pt-[15vh] backdrop-blur-sm animate-in fade-in duration-150"
+          className="fixed inset-0 z-[100] flex items-start justify-center bg-background/80 pt-[20vh] backdrop-blur-sm animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === overlayRef.current) setIsOpen(false)
           }}
         >
-          <div className="glass-strong mx-4 w-full max-w-lg overflow-hidden rounded-2xl shadow-2xl shadow-primary/10 animate-in slide-in-from-top-4 fade-in duration-200">
+          <div className="mx-4 w-full max-w-md overflow-hidden rounded-xl border border-border bg-card shadow-2xl shadow-black/50 animate-in slide-in-from-top-4 fade-in duration-200">
             {/* Input */}
             <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-              <Command className="h-5 w-5 text-primary" />
+              <Search className="h-4 w-4 text-muted-foreground" />
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Type a command or search..."
+                placeholder="Type a command..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleInternalKeyDown}
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
               />
-              <kbd className="rounded border border-border bg-secondary px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+              <kbd className="rounded border border-border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground/50">
                 ESC
               </kbd>
             </div>
 
             {/* Results */}
-            <div className="max-h-80 overflow-y-auto p-2">
+            <div className="max-h-72 overflow-y-auto p-1.5">
               {Object.entries(grouped).map(([category, items]) => (
                 <div key={category}>
-                  <p className="mb-1 mt-2 px-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <p className="mb-1 mt-2 px-3 text-[10px] font-medium tracking-widest uppercase text-muted-foreground/40">
                     {category}
                   </p>
                   {items.map((cmd) => {
@@ -238,21 +234,21 @@ export function CommandCenter() {
                           setIsOpen(false)
                         }}
                         onMouseEnter={() => setSelectedIndex(currentIndex)}
-                        className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
+                        className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors ${
                           selectedIndex === currentIndex
-                            ? "bg-primary/10 text-foreground"
-                            : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                            ? "bg-secondary text-foreground"
+                            : "text-muted-foreground hover:text-foreground"
                         }`}
                       >
                         <cmd.icon className="h-4 w-4 shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium">{cmd.label}</p>
-                          <p className="truncate text-xs opacity-60">
+                          <p className="text-sm">{cmd.label}</p>
+                          <p className="truncate text-[11px] opacity-50">
                             {cmd.description}
                           </p>
                         </div>
                         {selectedIndex === currentIndex && (
-                          <ArrowRight className="h-3 w-3 shrink-0 text-primary" />
+                          <ArrowRight className="h-3 w-3 shrink-0 text-foreground/50" />
                         )}
                       </button>
                     )
@@ -261,31 +257,25 @@ export function CommandCenter() {
               ))}
 
               {filtered.length === 0 && (
-                <p className="py-8 text-center text-sm text-muted-foreground">
+                <p className="py-6 text-center text-sm text-muted-foreground/50">
                   No commands found.
                 </p>
               )}
             </div>
 
-            {/* Footer hint */}
+            {/* Footer */}
             <div className="flex items-center gap-4 border-t border-border px-4 py-2">
-              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <kbd className="rounded border border-border bg-secondary px-1 py-0.5 font-mono text-[9px]">
-                  ↑↓
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground/40">
+                <kbd className="rounded border border-border px-1 py-0.5 font-mono text-[9px]">
+                  {"↑↓"}
                 </kbd>
                 Navigate
               </span>
-              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <kbd className="rounded border border-border bg-secondary px-1 py-0.5 font-mono text-[9px]">
-                  ↵
+              <span className="flex items-center gap-1 text-[10px] text-muted-foreground/40">
+                <kbd className="rounded border border-border px-1 py-0.5 font-mono text-[9px]">
+                  {"↵"}
                 </kbd>
                 Select
-              </span>
-              <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <kbd className="rounded border border-border bg-secondary px-1 py-0.5 font-mono text-[9px]">
-                  /
-                </kbd>
-                Open
               </span>
             </div>
           </div>

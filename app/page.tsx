@@ -9,19 +9,19 @@ import { Footer } from "@/components/footer"
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background">
-      {/* Section dividers with subtle gradient lines */}
+    <main className="relative min-h-screen bg-background">
       <HeroSection />
-      <div className="mx-auto h-px max-w-3xl bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="mx-auto h-px max-w-2xl bg-border" />
       <AboutSection />
-      <div className="mx-auto h-px max-w-3xl bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="mx-auto h-px max-w-2xl bg-border" />
       <ProjectsSection />
-      <div className="mx-auto h-px max-w-3xl bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="mx-auto h-px max-w-2xl bg-border" />
       <SkillsSection />
-      <div className="mx-auto h-px max-w-3xl bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="mx-auto h-px max-w-2xl bg-border" />
       <FounderSection />
-      <div className="mx-auto h-px max-w-3xl bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="mx-auto h-px max-w-2xl bg-border" />
       <GithubSection />
+      <div className="mx-auto h-px max-w-2xl bg-border" />
       <Footer />
       <CommandCenter />
     </main>
