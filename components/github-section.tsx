@@ -29,6 +29,7 @@ function AnimatedNumber({ target, visible }: { target: number; visible: boolean 
 
 export function GithubSection() {
   const { ref, visible } = useReveal(0.1)
+  const [hoveredStat, setHoveredStat] = useState<number | null>(null)
 
   const contributions = useMemo(() => {
     const seed = 42
@@ -44,10 +45,10 @@ export function GithubSection() {
   }, [])
 
   const stats = [
-    { label: "Repos", value: 20 },
-    { label: "Stars", value: 48 },
-    { label: "Forks", value: 25 },
-    { label: "Followers", value: 30 },
+    { label: "Repos", value: 20, icon: "///" },
+    { label: "Stars", value: 48, icon: "***" },
+    { label: "Forks", value: 25, icon: "<->" },
+    { label: "Followers", value: 30, icon: "@" },
   ]
 
   return (
@@ -55,13 +56,16 @@ export function GithubSection() {
       <div className="mx-auto max-w-6xl">
         {/* Section label */}
         <div
-          className={`mb-16 transition-all duration-700 ${
+          className={`mb-16 flex items-center gap-4 transition-all duration-700 ${
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
           <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/50">
             05 / Open Source
           </span>
+          <div
+            className={`h-px flex-1 bg-border ${visible ? "animate-line-grow" : "scale-x-0"}`}
+          />
         </div>
 
         {/* Header */}
@@ -77,7 +81,7 @@ export function GithubSection() {
             href="https://github.com/znafi"
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="group inline-flex items-center gap-2 font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             @znafi
             <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -90,16 +94,26 @@ export function GithubSection() {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          {stats.map((stat) => (
+          {stats.map((stat, i) => (
             <div
               key={stat.label}
-              className="group rounded-xl border border-border bg-secondary/30 p-6 transition-all hover:bg-secondary/60"
+              className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:border-foreground/15"
+              onMouseEnter={() => setHoveredStat(i)}
+              onMouseLeave={() => setHoveredStat(null)}
             >
-              <span className="block text-3xl font-bold tabular-nums text-foreground md:text-4xl">
+              {/* Background icon */}
+              <span
+                className={`absolute right-3 top-3 font-mono text-[2rem] font-bold leading-none transition-all duration-500 ${
+                  hoveredStat === i ? "text-foreground/8" : "text-foreground/3"
+                }`}
+              >
+                {stat.icon}
+              </span>
+              <span className="relative block text-3xl font-bold tabular-nums text-foreground md:text-4xl">
                 <AnimatedNumber target={stat.value} visible={visible} />
                 <span className="text-muted-foreground/30">+</span>
               </span>
-              <span className="mt-1 block text-xs uppercase tracking-widest text-muted-foreground/50">
+              <span className="relative mt-1 block text-xs uppercase tracking-widest text-muted-foreground/50">
                 {stat.label}
               </span>
             </div>
@@ -108,7 +122,7 @@ export function GithubSection() {
 
         {/* Contribution graph */}
         <div
-          className={`rounded-2xl border border-border bg-secondary/20 p-6 transition-all duration-700 delay-400 md:p-8 ${
+          className={`overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-700 delay-400 md:p-8 ${
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
@@ -139,7 +153,7 @@ export function GithubSection() {
                     return (
                       <div
                         key={di}
-                        className="h-[12px] w-[12px] rounded-[3px] transition-all duration-500"
+                        className="h-[12px] w-[12px] rounded-[3px] transition-all duration-500 hover:!opacity-100 hover:ring-1 hover:ring-foreground/20"
                         style={{
                           backgroundColor: `rgba(237, 237, 237, ${opacity})`,
                           transitionDelay: visible

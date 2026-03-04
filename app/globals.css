@@ -117,14 +117,30 @@ html {
   to { opacity: 1; transform: scale(1); }
 }
 
-@keyframes line-draw {
-  from { width: 0; }
-  to { width: 100%; }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-@keyframes count-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes text-scramble {
+  0% { opacity: 0; filter: blur(4px); }
+  50% { opacity: 0.5; filter: blur(2px); }
+  100% { opacity: 1; filter: blur(0); }
+}
+
+@keyframes image-reveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0% 0 0); }
+}
+
+@keyframes line-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
 @keyframes noise {
@@ -144,12 +160,23 @@ html {
   animation: marquee 30s linear infinite;
 }
 
-.animate-reveal-up {
-  animation: reveal-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
 }
 
-.animate-reveal-scale {
-  animation: reveal-scale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-image-reveal {
+  animation: image-reveal 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+.animate-line-grow {
+  animation: line-grow 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: left;
 }
 
 .noise-overlay {
@@ -165,4 +192,17 @@ html {
   pointer-events: none;
   z-index: 1;
   animation: noise 0.3s steps(4) infinite;
+}
+
+.tilt-card {
+  transition: transform 0.15s ease-out;
+  transform-style: preserve-3d;
+}
+
+.image-hover-zoom img {
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.image-hover-zoom:hover img {
+  transform: scale(1.05);
 }
