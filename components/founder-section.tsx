@@ -1,78 +1,78 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useReveal } from "@/hooks/use-reveal"
 import { ArrowUpRight } from "lucide-react"
 
 export function FounderSection() {
-  const ref = useRef<HTMLElement>(null)
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true) },
-      { threshold: 0.2 }
-    )
-    const el = ref.current
-    if (el) observer.observe(el)
-    return () => { if (el) observer.unobserve(el) }
-  }, [])
+  const { ref, visible } = useReveal(0.15)
 
   return (
-    <section id="founder" ref={ref} className="px-6 py-20 md:px-0 md:py-28">
-      <div className="mx-auto max-w-2xl">
+    <section id="founder" ref={ref} className="px-6 py-32 md:py-40">
+      <div className="mx-auto max-w-6xl">
+        {/* Section label */}
         <div
-          className={`transition-all duration-700 ${
-            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          className={`mb-16 transition-all duration-700 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <h2 className="mb-3 text-2xl font-bold text-foreground md:text-3xl">
-            Beyond code
-          </h2>
-          <p className="mb-10 text-base text-muted-foreground">
-            Building a business alongside engineering.
-          </p>
+          <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/50">
+            04 / Agency
+          </span>
         </div>
 
-        <a
-          href="https://zstudios.digital/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`group block rounded-xl border border-border p-6 transition-all duration-500 hover:border-foreground/20 md:p-8 ${
-            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-          style={{ transitionDelay: "150ms" }}
-        >
-          <div className="mb-6 flex items-start justify-between">
-            <div>
-              <h3 className="mb-1 text-xl font-bold text-foreground md:text-2xl">
-                ZStudios
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Full-service digital marketing agency
-              </p>
-            </div>
-            <ArrowUpRight className="h-5 w-5 text-muted-foreground/40 transition-all group-hover:text-foreground group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-16">
+          {/* Left - text */}
+          <div
+            className={`transition-all duration-700 delay-200 ${
+              visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
+          >
+            <h2 className="mb-6 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-tight text-foreground">
+              I also run a{" "}
+              <span className="text-muted-foreground/40">digital agency.</span>
+            </h2>
+            <p className="mb-8 max-w-md text-[15px] leading-relaxed text-foreground/60">
+              ZStudios bridges technology and marketing, helping brands establish a powerful digital presence through web development, SEO, content strategy, and data-driven growth.
+            </p>
+            <a
+              href="https://zstudios.digital/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Visit ZStudios
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
           </div>
 
-          <p className="mb-8 text-base leading-relaxed text-muted-foreground">
-            ZStudios bridges cutting-edge technology and strategic marketing.
-            We help brands establish a powerful digital presence through web
-            development, SEO, content strategy, and data-driven growth tactics.
-          </p>
-
-          <div className="flex flex-wrap gap-3">
-            {["Web Development", "Digital Marketing", "Growth Strategy", "SEO", "Content"].map(
-              (service) => (
-                <span
-                  key={service}
-                  className="rounded-full border border-border px-3 py-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80"
-                >
-                  {service}
-                </span>
-              )
-            )}
+          {/* Right - bento services */}
+          <div
+            className={`grid grid-cols-2 gap-3 transition-all duration-700 delay-400 ${
+              visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
+          >
+            {[
+              { label: "Web Dev", desc: "Custom sites & apps" },
+              { label: "SEO", desc: "Search visibility" },
+              { label: "Growth", desc: "Data-driven scaling" },
+              { label: "Content", desc: "Strategy & creation" },
+              { label: "Branding", desc: "Visual identity" },
+              { label: "Analytics", desc: "Insights & tracking" },
+            ].map((service, i) => (
+              <div
+                key={service.label}
+                className={`group rounded-xl border border-border bg-secondary/30 p-5 transition-all duration-300 hover:bg-secondary/60 hover:border-foreground/10 ${
+                  i === 0 ? "col-span-2" : ""
+                }`}
+              >
+                <p className="mb-1 text-sm font-medium text-foreground">
+                  {service.label}
+                </p>
+                <p className="text-xs text-muted-foreground">{service.desc}</p>
+              </div>
+            ))}
           </div>
-        </a>
+        </div>
       </div>
     </section>
   )

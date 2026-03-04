@@ -1,23 +1,35 @@
 "use client"
 
-import { useEffect, useRef, useState, useMemo } from "react"
+import { useReveal } from "@/hooks/use-reveal"
 import { ArrowUpRight } from "lucide-react"
+import { useMemo, useEffect, useState, useRef } from "react"
 
-export function GithubSection() {
-  const ref = useRef<HTMLElement>(null)
-  const [visible, setVisible] = useState(false)
+function AnimatedNumber({ target, visible }: { target: number; visible: boolean }) {
+  const [count, setCount] = useState(0)
+  const hasAnimated = useRef(false)
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true) },
-      { threshold: 0.2 }
-    )
-    const el = ref.current
-    if (el) observer.observe(el)
-    return () => { if (el) observer.unobserve(el) }
-  }, [])
+    if (!visible || hasAnimated.current) return
+    hasAnimated.current = true
+    const duration = 1500
+    const startTime = Date.now()
 
-  // Stable contribution data
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setCount(Math.floor(eased * target))
+      if (progress < 1) requestAnimationFrame(animate)
+    }
+    requestAnimationFrame(animate)
+  }, [visible, target])
+
+  return <>{count}</>
+}
+
+export function GithubSection() {
+  const { ref, visible } = useReveal(0.1)
+
   const contributions = useMemo(() => {
     const seed = 42
     const weeks = 52
@@ -32,54 +44,62 @@ export function GithubSection() {
   }, [])
 
   const stats = [
-    { label: "Repositories", value: "20+" },
-    { label: "Stars", value: "48+" },
-    { label: "Forks", value: "25+" },
-    { label: "Followers", value: "30+" },
+    { label: "Repos", value: 20 },
+    { label: "Stars", value: 48 },
+    { label: "Forks", value: 25 },
+    { label: "Followers", value: 30 },
   ]
 
   return (
-    <section id="github" ref={ref} className="px-6 py-20 md:px-0 md:py-28">
-      <div className="mx-auto max-w-2xl">
+    <section id="github" ref={ref} className="px-6 py-32 md:py-40">
+      <div className="mx-auto max-w-6xl">
+        {/* Section label */}
         <div
-          className={`mb-10 flex items-start justify-between transition-all duration-700 ${
-            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          className={`mb-16 transition-all duration-700 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div>
-            <h2 className="mb-3 text-2xl font-bold text-foreground md:text-3xl">
-              GitHub
-            </h2>
-            <p className="text-base text-muted-foreground">
-              Contributions, commits, and open-source work.
-            </p>
-          </div>
+          <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/50">
+            05 / Open Source
+          </span>
+        </div>
+
+        {/* Header */}
+        <div
+          className={`mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end transition-all duration-700 delay-200 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
+          <h2 className="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-[1] tracking-tight text-foreground">
+            GitHub
+          </h2>
           <a
             href="https://github.com/znafi"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             @znafi
-            <ArrowUpRight className="h-3 w-3" />
+            <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
         </div>
 
-        {/* Stats */}
+        {/* Stats counters */}
         <div
-          className={`mb-10 grid grid-cols-2 gap-4 md:grid-cols-4 transition-all duration-700 delay-100 ${
-            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          className={`mb-16 grid grid-cols-2 gap-4 md:grid-cols-4 transition-all duration-700 delay-300 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl border border-border p-4"
+              className="group rounded-xl border border-border bg-secondary/30 p-6 transition-all hover:bg-secondary/60"
             >
-              <span className="block text-2xl font-bold text-foreground">
-                {stat.value}
+              <span className="block text-3xl font-bold tabular-nums text-foreground md:text-4xl">
+                <AnimatedNumber target={stat.value} visible={visible} />
+                <span className="text-muted-foreground/30">+</span>
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="mt-1 block text-xs uppercase tracking-widest text-muted-foreground/50">
                 {stat.label}
               </span>
             </div>
@@ -88,29 +108,45 @@ export function GithubSection() {
 
         {/* Contribution graph */}
         <div
-          className={`rounded-xl border border-border p-5 transition-all duration-700 delay-200 ${
-            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          className={`rounded-2xl border border-border bg-secondary/20 p-6 transition-all duration-700 delay-400 md:p-8 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <p className="mb-4 text-xs font-medium tracking-widest uppercase text-muted-foreground">
-            Contribution Activity
-          </p>
+          <div className="mb-6 flex items-center justify-between">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground/50">
+              Contribution Activity
+            </p>
+            <span className="font-mono text-xs text-muted-foreground/30">
+              Last 12 months
+            </span>
+          </div>
 
           <div className="overflow-x-auto">
-            <div className="flex gap-[3px] min-w-[660px]">
+            <div className="flex gap-[3px]" style={{ minWidth: 700 }}>
               {contributions.map((week, wi) => (
                 <div key={wi} className="flex flex-col gap-[3px]">
                   {week.map((level, di) => {
                     const opacity =
-                      level === 0 ? 0.06 : level === 1 ? 0.2 : level === 2 ? 0.4 : level === 3 ? 0.65 : 0.9
+                      level === 0
+                        ? 0.04
+                        : level === 1
+                        ? 0.15
+                        : level === 2
+                        ? 0.35
+                        : level === 3
+                        ? 0.6
+                        : 0.9
                     return (
                       <div
                         key={di}
-                        className="h-[11px] w-[11px] rounded-[2px] transition-all duration-300"
+                        className="h-[12px] w-[12px] rounded-[3px] transition-all duration-500"
                         style={{
-                          backgroundColor: `rgba(250, 250, 250, ${opacity})`,
-                          transitionDelay: visible ? `${wi * 8 + di * 15}ms` : "0ms",
+                          backgroundColor: `rgba(237, 237, 237, ${opacity})`,
+                          transitionDelay: visible
+                            ? `${500 + wi * 6 + di * 12}ms`
+                            : "0ms",
                           opacity: visible ? 1 : 0,
+                          transform: visible ? "scale(1)" : "scale(0)",
                         }}
                       />
                     )
@@ -120,16 +156,20 @@ export function GithubSection() {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-end gap-1.5">
-            <span className="mr-1 text-[10px] text-muted-foreground/50">Less</span>
-            {[0.06, 0.2, 0.4, 0.65, 0.9].map((op, i) => (
+          <div className="mt-5 flex items-center justify-end gap-1.5">
+            <span className="mr-1 text-[10px] text-muted-foreground/30">
+              Less
+            </span>
+            {[0.04, 0.15, 0.35, 0.6, 0.9].map((op, i) => (
               <div
                 key={i}
-                className="h-[11px] w-[11px] rounded-[2px]"
-                style={{ backgroundColor: `rgba(250, 250, 250, ${op})` }}
+                className="h-[12px] w-[12px] rounded-[3px]"
+                style={{ backgroundColor: `rgba(237, 237, 237, ${op})` }}
               />
             ))}
-            <span className="ml-1 text-[10px] text-muted-foreground/50">More</span>
+            <span className="ml-1 text-[10px] text-muted-foreground/30">
+              More
+            </span>
           </div>
         </div>
       </div>
