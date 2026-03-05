@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { ArrowDown, Github, ExternalLink } from "lucide-react"
+import { ArrowDown } from "lucide-react"
 import Image from "next/image"
 import {
   motion,
@@ -68,43 +68,62 @@ function RotatingText() {
   return (
     <span className="relative inline-flex h-[1.15em] overflow-hidden align-bottom">
       <AnimatePresence mode="wait">
-        <motion.span
-          key={index}
-          initial={{ y: "100%", opacity: 0 }}
-          animate={{ y: "0%", opacity: 1 }}
-          exit={{ y: "-100%", opacity: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="inline-block whitespace-nowrap text-foreground/50"
-        >
-          {rotatingTexts[index]}
-        </motion.span>
+          <motion.span
+            key={index}
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: "0%", opacity: 1 }}
+            exit={{ y: "-100%", opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="inline-block whitespace-nowrap text-foreground"
+            style={{ textShadow: "0 0 20px currentColor" }}
+          >
+            {rotatingTexts[index]}
+          </motion.span>
       </AnimatePresence>
     </span>
   )
 }
 
-/* ---------- floating particles ---------- */
-function FloatingParticles() {
-  const particles = useRef(
-    Array.from({ length: 30 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 2 + 1,
-      duration: Math.random() * 10 + 15,
-      delay: Math.random() * 5,
-    }))
-  ).current
+/* ---------- hero background (blobs + grid + particles) ---------- */
+type Particle = { id: number; x: number; y: number; size: number; duration: number; delay: number }
+
+function HeroBackground() {
+  const [particles, setParticles] = useState<Particle[] | null>(null)
+
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 16 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 2 + 1,
+        duration: Math.random() * 8 + 12,
+        delay: Math.random() * 6,
+      }))
+    )
+  }, [])
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {particles.map((p) => (
-        <motion.div
+      {/* Atmosphere blobs */}
+      <div className="hero-blob hero-blob-1" />
+      <div className="hero-blob hero-blob-2" />
+      <div className="hero-blob hero-blob-3" />
+      {/* Dot grid */}
+      <div className="hero-grid hidden md:block" />
+      {/* Floating particles */}
+      {particles?.map((p) => (
+        <div
           key={p.id}
-          className="absolute rounded-full bg-foreground/[0.07]"
-          style={{ width: p.size, height: p.size, left: `${p.x}%`, top: `${p.y}%` }}
-          animate={{ y: [0, -30, 0], x: [0, 15, 0], opacity: [0, 0.7, 0] }}
-          transition={{ duration: p.duration, repeat: Infinity, delay: p.delay, ease: "easeInOut" }}
+          className="hero-particle absolute rounded-full bg-white/10"
+          style={{
+            width: p.size,
+            height: p.size,
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            animationDuration: `${p.duration}s`,
+            animationDelay: `${p.delay}s`,
+          }}
         />
       ))}
     </div>
@@ -174,9 +193,9 @@ export function HeroSection() {
   }
 
   const childVariants = {
-    hidden: { opacity: 0, y: 40, filter: "blur(4px)" },
+    hidden: { opacity: 0, y: 40 },
     visible: {
-      opacity: 1, y: 0, filter: "blur(0px)",
+      opacity: 1, y: 0,
       transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
     },
   }
@@ -187,7 +206,7 @@ export function HeroSection() {
       ref={sectionRef}
       className="relative flex min-h-screen flex-col overflow-hidden px-6 pt-24"
     >
-      <FloatingParticles />
+      <HeroBackground />
 
       <motion.div className="mx-auto flex w-full max-w-6xl flex-1 flex-col" style={{ opacity }}>
         {/* --- Portrait at the top --- */}
@@ -199,10 +218,12 @@ export function HeroSection() {
           className="mb-12 flex justify-center md:mb-16"
         >
           <motion.div style={{ scale: imageScale }}>
+            <div className="relative">
+              <div className="portrait-halo" />
             <div
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
-              className="tilt-card image-hover-zoom relative h-[180px] w-[180px] overflow-hidden rounded-full border-2 border-border md:h-[220px] md:w-[220px]"
+              className="tilt-card image-hover-zoom relative h-[180px] w-[180px] overflow-hidden rounded-full border-2 border-white/10 md:h-[220px] md:w-[220px]"
             >
               <div className={`relative h-full w-full ${imageInView ? "animate-image-reveal" : "opacity-0"}`}>
                 <Image
@@ -215,6 +236,7 @@ export function HeroSection() {
                 />
               </div>
               <div className="absolute inset-0 animate-shimmer" />
+            </div>
             </div>
           </motion.div>
         </motion.div>
@@ -230,20 +252,15 @@ export function HeroSection() {
             animate={mounted ? "visible" : "hidden"}
             className="flex flex-col items-center"
           >
-            {/* Status */}
-            <motion.div variants={childVariants} className="mb-8 flex items-center gap-3">
-              <div className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground/50" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-foreground" />
-              </div>
-              <span className="text-[13px] tracking-wide text-muted-foreground">
-                Available for new opportunities
-              </span>
-            </motion.div>
-
             {/* Name */}
             <motion.div variants={childVariants} className="mb-6 overflow-hidden">
-              <h1 className="font-mono text-[clamp(2.5rem,8vw,6.5rem)] font-bold leading-[0.9] tracking-tighter text-foreground">
+              <h1
+                className="font-mono text-[clamp(2.5rem,8vw,6.5rem)] font-bold leading-[0.9] tracking-tighter bg-gradient-to-b from-foreground to-foreground/65 bg-clip-text"
+                style={{
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
                 {name || "\u00A0"}
               </h1>
             </motion.div>
@@ -252,7 +269,7 @@ export function HeroSection() {
             <motion.div variants={childVariants} className="mb-5 flex flex-wrap items-center justify-center gap-3">
               <motion.span
                 className="role-badge-swe relative inline-flex items-center gap-2.5 overflow-hidden rounded-full border border-foreground/30 bg-foreground/[0.08] px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-foreground backdrop-blur-md md:text-base"
-                whileHover={{ scale: 1.05, borderColor: "rgba(237,237,237,0.5)" }}
+                whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 <span className="relative z-10 flex items-center gap-2.5">
@@ -265,11 +282,11 @@ export function HeroSection() {
                 <span className="absolute inset-0 bg-gradient-to-r from-foreground/[0.06] via-foreground/[0.12] to-foreground/[0.06] opacity-0 transition-opacity duration-500 hover:opacity-100" />
               </motion.span>
 
-              <span className="text-lg font-light text-foreground/20">/</span>
+              <span className="text-lg font-light text-foreground/20">|</span>
 
               <motion.span
                 className="role-badge-founder relative inline-flex items-center gap-2.5 overflow-hidden rounded-full border border-foreground/30 bg-foreground/[0.08] px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-foreground backdrop-blur-md md:text-base"
-                whileHover={{ scale: 1.05, borderColor: "rgba(237,237,237,0.5)" }}
+                whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 <span className="relative z-10 flex items-center gap-2.5">
@@ -285,17 +302,16 @@ export function HeroSection() {
 
             {/* University line */}
             <motion.div variants={childVariants} className="mb-4">
-              <p className="font-mono text-[13px] tracking-wide text-muted-foreground/60">
+              <p className="font-mono text-[15px] font-semibold tracking-wide text-muted-foreground/70 md:text-base">
                 3rd Year CS{" "}
-                <span className="mx-1.5 text-foreground/15">{"///"}</span>{" "}
-                <span className="text-muted-foreground/80">University of Alberta</span>
+                <span className="mx-2 text-foreground/20">|</span>{" "}
+                <span className="text-muted-foreground/90">University of Alberta</span>
               </p>
             </motion.div>
 
             {/* Rotating text carousel */}
             <motion.div variants={childVariants} className="mb-4 overflow-hidden">
-              <p className="font-mono text-[clamp(1rem,2.5vw,1.5rem)] font-medium leading-[1.2] tracking-tight text-muted-foreground">
-                {"also a "}
+              <p className="font-mono text-[clamp(1rem,2.5vw,1.5rem)] font-medium leading-[1.2] tracking-tight text-foreground/50">
                 <RotatingText />
               </p>
             </motion.div>
@@ -303,7 +319,7 @@ export function HeroSection() {
             {/* Description */}
             <motion.div variants={childVariants} className="mb-10 max-w-lg">
               <p className="text-base leading-relaxed text-muted-foreground md:text-lg">
-                I build products, write clean systems, and run{" "}
+                Software engineer and founder based in Edmonton. I build full-stack products and run{" "}
                 <a
                   href="https://zstudios.digital/"
                   target="_blank"
@@ -312,36 +328,18 @@ export function HeroSection() {
                 >
                   ZStudios
                 </a>
-                . Obsessed with code that actually ships.
+                , a digital agency, while studying Computer Science at the University of Alberta.
               </p>
             </motion.div>
 
             {/* CTAs */}
             <motion.div variants={childVariants} className="flex flex-wrap items-center justify-center gap-4">
-              <MagneticButton
+                <MagneticButton
                 href="#projects"
                 className="group inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90 active:scale-[0.97]"
               >
                 View my work
                 <ArrowDown className="h-3.5 w-3.5 transition-transform group-hover:translate-y-0.5" />
-              </MagneticButton>
-              <MagneticButton
-                href="https://github.com/znafi"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm text-foreground transition-all hover:border-foreground/30 hover:bg-secondary/50 active:scale-[0.97]"
-              >
-                <Github className="h-3.5 w-3.5" />
-                GitHub
-              </MagneticButton>
-              <MagneticButton
-                href="https://zstudios.digital/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm text-foreground transition-all hover:border-foreground/30 hover:bg-secondary/50 active:scale-[0.97]"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                ZStudios
               </MagneticButton>
             </motion.div>
           </motion.div>

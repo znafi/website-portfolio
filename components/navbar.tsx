@@ -1,46 +1,48 @@
 "use client"
 
 import { useEffect, useState, useRef, useCallback } from "react"
-import { Terminal } from "lucide-react"
+import { Sun, Moon } from "lucide-react"
+import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
 
 const navItems = [
   { label: "Experience", href: "#experience", id: "experience" },
   { label: "Work", href: "#projects", id: "projects" },
   { label: "Skills", href: "#skills", id: "skills" },
-  { label: "Agency", href: "#founder", id: "founder" },
+  { label: "Contact", href: "#contact", id: "contact" },
 ]
 
-export function Navbar({ onOpenCommand }: { onOpenCommand: () => void }) {
+export function Navbar({ onOpenCommand }: { onOpenCommand?: () => void }) {
   const [scrolled, setScrolled] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [activeSection, setActiveSection] = useState("")
   const lastScrollY = useRef(0)
+  const ticking = useRef(false)
+  const { theme, setTheme } = useTheme()
+  void onOpenCommand
 
-  const handleScroll = useCallback(() => {
+  const update = useCallback(() => {
     const y = window.scrollY
     setScrolled(y > 50)
-
-    /* hide on scroll down, show on scroll up */
-    if (y > lastScrollY.current && y > 200) {
-      setHidden(true)
-    } else {
-      setHidden(false)
-    }
+    setHidden(y > lastScrollY.current && y > 200)
     lastScrollY.current = y
 
-    /* active section detection */
     const sections = navItems.map((n) => document.getElementById(n.id))
     let current = ""
     for (const sec of sections) {
-      if (sec) {
-        const rect = sec.getBoundingClientRect()
-        if (rect.top <= 200) current = sec.id
-      }
+      if (sec && sec.getBoundingClientRect().top <= 200) current = sec.id
     }
     setActiveSection(current)
+    ticking.current = false
   }, [])
+
+  const handleScroll = useCallback(() => {
+    if (!ticking.current) {
+      ticking.current = true
+      requestAnimationFrame(update)
+    }
+  }, [update])
 
   useEffect(() => {
     setMounted(true)
@@ -95,12 +97,33 @@ export function Navbar({ onOpenCommand }: { onOpenCommand: () => void }) {
         </div>
 
         <button
-          onClick={onOpenCommand}
-          className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-[12px] text-muted-foreground transition-all hover:border-foreground/30 hover:text-foreground"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-all hover:border-foreground/30 hover:text-foreground"
+          aria-label="Toggle theme"
         >
-          <Terminal className="h-3 w-3" />
-          <span className="hidden md:inline">{"Press /"}</span>
-          <span className="md:hidden">Menu</span>
+          <AnimatePresence mode="wait" initial={false}>
+            {mounted && theme === "dark" ? (
+              <motion.div
+                key="sun"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Sun className="h-4 w-4" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="moon"
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Moon className="h-4 w-4" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </button>
       </nav>
     </motion.header>

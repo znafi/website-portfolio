@@ -1,26 +1,8 @@
 "use client"
 
-import { useRef, useMemo, useEffect, useState } from "react"
+import { useRef, useMemo } from "react"
 import { ArrowUpRight } from "lucide-react"
-import { motion, useInView, useSpring, useMotionValue } from "framer-motion"
-
-/* ---------- spring-based animated number ---------- */
-function SpringNumber({ target, visible }: { target: number; visible: boolean }) {
-  const mv = useMotionValue(0)
-  const spring = useSpring(mv, { stiffness: 60, damping: 20 })
-  const [display, setDisplay] = useState(0)
-
-  useEffect(() => {
-    if (visible) mv.set(target)
-  }, [visible, target, mv])
-
-  useEffect(() => {
-    const unsub = spring.on("change", (v: number) => setDisplay(Math.round(v)))
-    return unsub
-  }, [spring])
-
-  return <>{display}</>
-}
+import { motion, useInView } from "framer-motion"
 
 /* ---------- main component ---------- */
 export function GithubSection() {
@@ -39,13 +21,6 @@ export function GithubSection() {
       })
     )
   }, [])
-
-  const stats = [
-    { label: "Repos", value: 20, icon: "///" },
-    { label: "Stars", value: 48, icon: "***" },
-    { label: "Forks", value: 25, icon: "<->" },
-    { label: "Followers", value: 30, icon: "@" },
-  ]
 
   return (
     <section id="github" ref={sectionRef} className="px-6 py-32 md:py-40">
@@ -76,9 +51,14 @@ export function GithubSection() {
           transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end"
         >
-          <h2 className="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-[1] tracking-tight text-foreground">
-            GitHub
-          </h2>
+          <div>
+            <h2 className="mb-3 text-[clamp(2rem,5vw,3.5rem)] font-bold leading-[1] tracking-tight text-foreground">
+              GitHub
+            </h2>
+            <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground/60">
+              Most of my work is open-source. The code, commit history, and early iterations are all there to look through.
+            </p>
+          </div>
           <a
             href="https://github.com/znafi"
             target="_blank"
@@ -89,39 +69,6 @@ export function GithubSection() {
             <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
         </motion.div>
-
-        {/* Stats counters with spring physics */}
-        <div className="mb-16 grid grid-cols-2 gap-4 md:grid-cols-4">
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-              transition={{
-                duration: 0.6,
-                delay: 0.2 + i * 0.1,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              whileHover={{
-                y: -4,
-                transition: { type: "spring", stiffness: 300, damping: 20 },
-              }}
-              className="spotlight-card glow-border group relative overflow-hidden rounded-2xl border border-border bg-card p-6"
-            >
-              {/* Background icon */}
-              <span className="absolute right-3 top-3 font-mono text-[2rem] font-bold leading-none text-foreground/[0.03] transition-all duration-500 group-hover:text-foreground/[0.08]">
-                {stat.icon}
-              </span>
-              <span className="relative block text-3xl font-bold tabular-nums text-foreground md:text-4xl">
-                <SpringNumber target={stat.value} visible={isInView} />
-                <span className="text-muted-foreground/30">+</span>
-              </span>
-              <span className="relative mt-1 block text-xs uppercase tracking-widest text-muted-foreground/50">
-                {stat.label}
-              </span>
-            </motion.div>
-          ))}
-        </div>
 
         {/* Contribution graph with wave animation */}
         <motion.div
@@ -139,8 +86,11 @@ export function GithubSection() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <div className="flex gap-[3px]" style={{ minWidth: 700 }}>
+            <div className="overflow-x-auto">
+            <div
+              className="flex gap-[3px] transition-opacity duration-700"
+              style={{ minWidth: 700, opacity: isInView ? 1 : 0 }}
+            >
               {contributions.map((week, wi) => (
                 <div key={wi} className="flex flex-col gap-[3px]">
                   {week.map((level, di) => {
@@ -155,22 +105,11 @@ export function GithubSection() {
                         ? 0.6
                         : 0.9
                     return (
-                      <motion.div
+                      <div
                         key={di}
                         className="h-[12px] w-[12px] rounded-[3px] hover:ring-1 hover:ring-foreground/20"
                         style={{
-                          backgroundColor: `rgba(237, 237, 237, ${opacity})`,
-                        }}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={
-                          isInView
-                            ? { opacity: 1, scale: 1 }
-                            : {}
-                        }
-                        transition={{
-                          duration: 0.3,
-                          delay: 0.5 + wi * 0.008 + di * 0.015,
-                          ease: [0.16, 1, 0.3, 1],
+                          backgroundColor: `color-mix(in srgb, var(--foreground) ${Math.round(opacity * 100)}%, transparent)`,
                         }}
                       />
                     )
@@ -188,7 +127,7 @@ export function GithubSection() {
               <div
                 key={i}
                 className="h-[12px] w-[12px] rounded-[3px]"
-                style={{ backgroundColor: `rgba(237, 237, 237, ${op})` }}
+                style={{ backgroundColor: `color-mix(in srgb, var(--foreground) ${Math.round(op * 100)}%, transparent)` }}
               />
             ))}
             <span className="ml-1 text-[10px] text-muted-foreground/30">

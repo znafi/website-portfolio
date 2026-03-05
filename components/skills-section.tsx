@@ -1,74 +1,33 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { motion, useInView, AnimatePresence } from "framer-motion"
+import { useRef, useEffect, useState, useCallback } from "react"
+import { motion, useInView } from "framer-motion"
 
 /* ---------- data ---------- */
 const categories = [
   {
     name: "Languages",
-    icon: "{ }",
-    items: [
-      { name: "TypeScript", level: 95 },
-      { name: "JavaScript", level: 90 },
-      { name: "Python", level: 85 },
-      { name: "Motoko", level: 60 },
-    ],
+    items: ["HTML", "CSS", "TypeScript", "JavaScript", "Python", "SQL", "C++", "Motoko"],
   },
   {
     name: "Frontend",
-    icon: "</>",
-    items: [
-      { name: "React", level: 95 },
-      { name: "Next.js", level: 90 },
-      { name: "React Native", level: 75 },
-      { name: "Tailwind CSS", level: 95 },
-    ],
+    items: ["React", "Next.js", "React Native", "Tailwind CSS"],
   },
   {
     name: "Backend",
-    icon: ">>>",
-    items: [
-      { name: "Node.js", level: 90 },
-      { name: "Flask", level: 80 },
-      { name: "REST APIs", level: 92 },
-      { name: "GraphQL", level: 70 },
-    ],
+    items: ["Node.js", "Express", "Flask", "REST APIs", "GraphQL", "Prisma"],
   },
   {
     name: "Data",
-    icon: "DB",
-    items: [
-      { name: "PostgreSQL", level: 88 },
-      { name: "Supabase", level: 85 },
-      { name: "Firebase", level: 80 },
-      { name: "MongoDB", level: 75 },
-      { name: "Elasticsearch", level: 70 },
-    ],
+    items: ["PostgreSQL", "Supabase", "Firebase", "MongoDB", "SQLite", "Elasticsearch"],
   },
   {
-    name: "DevOps",
-    icon: "CI",
-    items: [
-      { name: "Docker", level: 80 },
-      { name: "GitHub Actions", level: 88 },
-      { name: "CI/CD", level: 85 },
-      { name: "Git", level: 95 },
-    ],
-  },
-  {
-    name: "Other",
-    icon: "**",
-    items: [
-      { name: "Playwright", level: 90 },
-      { name: "Internet Computer", level: 65 },
-      { name: "Smart Contracts", level: 60 },
-      { name: "Blockchain", level: 55 },
-    ],
+    name: "DevOps & Tools",
+    items: ["Git", "Docker", "GitHub Actions", "Playwright", "VS Code", "Postman"],
   },
 ]
 
-const allTechs = categories.flatMap((c) => c.items.map((i) => i.name))
+const allTechs = categories.flatMap((c) => c.items)
 
 /* ---------- infinite marquee ---------- */
 function InfiniteMarquee({ items, reverse = false }: { items: string[]; reverse?: boolean }) {
@@ -93,129 +52,292 @@ function InfiniteMarquee({ items, reverse = false }: { items: string[]; reverse?
   )
 }
 
-/* ---------- interactive category panel ---------- */
-function CategoryPanel({
-  cat,
-  isOpen,
-  onToggle,
-  index,
-}: {
-  cat: (typeof categories)[0]
-  isOpen: boolean
-  onToggle: () => void
-  index: number
-}) {
-  const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-5%" })
+/* ---------- 3D sphere tag cloud ---------- */
+
+interface TagPoint {
+  text: string
+  x: number
+  y: number
+  z: number
+}
+
+function fibonacciSphere(tags: string[]): TagPoint[] {
+  const n = tags.length
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5))
+  return tags.map((text, i) => {
+    const y = 1 - (i / (n - 1)) * 2
+    const radiusAtY = Math.sqrt(1 - y * y)
+    const theta = goldenAngle * i
+    return {
+      text,
+      x: Math.cos(theta) * radiusAtY,
+      y,
+      z: Math.sin(theta) * radiusAtY,
+    }
+  })
+}
+
+function rotateX(p: TagPoint, angle: number): TagPoint {
+  const cos = Math.cos(angle)
+  const sin = Math.sin(angle)
+  return { ...p, y: p.y * cos - p.z * sin, z: p.y * sin + p.z * cos }
+}
+
+function rotateY(p: TagPoint, angle: number): TagPoint {
+  const cos = Math.cos(angle)
+  const sin = Math.sin(angle)
+  return { ...p, x: p.x * cos + p.z * sin, z: -p.x * sin + p.z * cos }
+}
+
+function SphereCloud({ techs }: { techs: string[] }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const canvasPoints = useRef(fibonacciSphere(techs))
+  const angleX = useRef(0)
+  const angleY = useRef(0)
+  const targetSpeedX = useRef(0.002)
+  const targetSpeedY = useRef(0.004)
+  const speedX = useRef(0.002)
+  const speedY = useRef(0.004)
+  const raf = useRef(0)
+  const [rendered, setRendered] = useState<
+    { text: string; tx: number; ty: number; scale: number; opacity: number }[]
+  >([])
+  const [hovered, setHovered] = useState<string | null>(null)
+
+  useEffect(() => {
+    canvasPoints.current = fibonacciSphere(techs)
+  }, [techs])
+
+  const tick = useCallback(() => {
+    speedX.current += (targetSpeedX.current - speedX.current) * 0.08
+    speedY.current += (targetSpeedY.current - speedY.current) * 0.08
+
+    angleX.current += speedX.current
+    angleY.current += speedY.current
+
+    const container = containerRef.current
+    if (!container) {
+      raf.current = requestAnimationFrame(tick)
+      return
+    }
+    const rect = container.getBoundingClientRect()
+    const radius = Math.min(rect.width, rect.height) * 0.42
+
+    const items = canvasPoints.current.map((p) => {
+      const r1 = rotateX(p, angleX.current)
+      const r2 = rotateY(r1, angleY.current)
+      const fov = 600
+      const perspective = fov / (fov + r2.z * radius)
+      return {
+        text: p.text,
+        tx: r2.x * radius * perspective,
+        ty: r2.y * radius * perspective,
+        scale: perspective,
+        opacity: Math.max(0.15, (r2.z + 1) / 2),
+      }
+    })
+
+    setRendered(items)
+    raf.current = requestAnimationFrame(tick)
+  }, [])
+
+  useEffect(() => {
+    raf.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf.current)
+  }, [tick])
+
+  const lastTouch = useRef({ x: 0, y: 0 })
+  const isTouching = useRef(false)
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.pointerType === "touch") return // handled by touch handlers
+      const rect = containerRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const mx = (e.clientX - rect.left) / rect.width - 0.5
+      const my = (e.clientY - rect.top) / rect.height - 0.5
+      targetSpeedX.current = -my * 0.025
+      targetSpeedY.current = mx * 0.025
+    },
+    []
+  )
+
+  const handlePointerLeave = useCallback(() => {
+    if (!isTouching.current) {
+      targetSpeedX.current = 0.002
+      targetSpeedY.current = 0.004
+    }
+  }, [])
+
+  const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    isTouching.current = true
+    lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  }, [])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    const dx = e.touches[0].clientX - lastTouch.current.x
+    const dy = e.touches[0].clientY - lastTouch.current.y
+    lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (!rect) return
+    targetSpeedX.current = (-dy / rect.height) * 0.8
+    targetSpeedY.current = (dx / rect.width) * 0.8
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    isTouching.current = false
+    targetSpeedX.current = 0.002
+    targetSpeedY.current = 0.004
+  }, [])
 
   return (
+    <div
+      ref={containerRef}
+      className="relative mx-auto aspect-square w-full max-w-[600px] min-h-[320px] cursor-grab select-none touch-none active:cursor-grabbing"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {rendered.map((item) => {
+        const isHovered = hovered === item.text
+        const fontSize = item.scale > 1.1 ? "text-[11px] md:text-lg" : item.scale > 0.9 ? "text-[10px] md:text-base" : "text-[9px] md:text-sm"
+
+        return (
+          <div
+            key={item.text}
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap"
+            style={{
+              transform: `translate(-50%, -50%) translate(${item.tx}px, ${item.ty}px) scale(${item.scale})`,
+              opacity: isHovered ? 1 : item.opacity,
+              zIndex: Math.round(item.scale * 100),
+              transition: "opacity 0.3s",
+            }}
+            onPointerEnter={() => setHovered(item.text)}
+            onPointerLeave={() => setHovered(null)}
+          >
+            <span
+              className={`font-mono font-medium tracking-tight transition-all duration-300 ${fontSize} ${
+                isHovered
+                  ? "text-foreground scale-125"
+                  : "text-foreground/70"
+              }`}
+              style={
+                isHovered
+                  ? { textShadow: "0 0 24px currentColor" }
+                  : undefined
+              }
+            >
+              {item.text}
+            </span>
+          </div>
+        )
+      })}
+
+      {/* Center glow */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          width: "40%",
+          height: "40%",
+          background: "radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 70%)",
+        }}
+      />
+    </div>
+  )
+}
+
+/* ---------- icon data ---------- */
+const D = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons"
+
+const techIcons: Record<string, string> = {
+  "HTML":            `${D}/html5/html5-original.svg`,
+  "CSS":             `${D}/css3/css3-original.svg`,
+  "TypeScript":      `${D}/typescript/typescript-original.svg`,
+  "JavaScript":      `${D}/javascript/javascript-original.svg`,
+  "Python":          `${D}/python/python-original.svg`,
+  "SQL":             `${D}/azuresqldatabase/azuresqldatabase-original.svg`,
+  "C++":             `${D}/cplusplus/cplusplus-original.svg`,
+  "React":           `${D}/react/react-original.svg`,
+  "Next.js":         `${D}/nextjs/nextjs-original.svg`,
+  "React Native":    `${D}/react/react-original.svg`,
+  "Tailwind CSS":    `${D}/tailwindcss/tailwindcss-original.svg`,
+  "Node.js":         `${D}/nodejs/nodejs-original.svg`,
+  "Express":         `${D}/express/express-original.svg`,
+  "Flask":           `${D}/flask/flask-original.svg`,
+  "GraphQL":         `${D}/graphql/graphql-plain.svg`,
+  "Prisma":          `${D}/prisma/prisma-original.svg`,
+  "PostgreSQL":      `${D}/postgresql/postgresql-original.svg`,
+  "Supabase":        `${D}/supabase/supabase-original.svg`,
+  "Firebase":        `${D}/firebase/firebase-original.svg`,
+  "MongoDB":         `${D}/mongodb/mongodb-original.svg`,
+  "SQLite":          `${D}/sqlite/sqlite-original.svg`,
+  "Elasticsearch":   `${D}/elasticsearch/elasticsearch-original.svg`,
+  "Git":             `${D}/git/git-original.svg`,
+  "Docker":          `${D}/docker/docker-original.svg`,
+  "GitHub Actions":  `${D}/github/github-original.svg`,
+  "VS Code":         `${D}/vscode/vscode-original.svg`,
+  "Postman":         `${D}/postman/postman-original.svg`,
+  "Playwright":      `${D}/playwright/playwright-original.svg`,
+}
+
+/* ---------- icon grid ---------- */
+function TechIconGrid({ isInView }: { isInView: boolean }) {
+  return (
     <motion.div
-      ref={ref}
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="mt-6"
     >
-      {/* Accordion header */}
-      <button
-        onClick={onToggle}
-        className="group flex w-full items-center justify-between border-b border-border py-6 text-left transition-colors hover:border-foreground/20 md:py-8"
-      >
-        <div className="flex items-center gap-4 md:gap-6">
-          <motion.span
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border font-mono text-xs text-muted-foreground/40 transition-all group-hover:border-foreground/20 group-hover:text-foreground/70 md:h-12 md:w-12 md:text-sm"
-            animate={{ rotate: isOpen ? 90 : 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {cat.icon}
-          </motion.span>
-          <span className="text-xl font-medium tracking-tight text-foreground/80 transition-colors group-hover:text-foreground md:text-2xl lg:text-3xl">
+      {categories.map((cat, ci) => (
+        <div key={cat.name} className="mb-10">
+          <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground/30">
             {cat.name}
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="hidden font-mono text-xs text-muted-foreground/30 md:block">
-            {cat.items.length} skills
-          </span>
-          <motion.span
-            className="text-xl text-muted-foreground/40 transition-colors group-hover:text-foreground"
-            animate={{ rotate: isOpen ? 45 : 0 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          >
-            +
-          </motion.span>
-        </div>
-      </button>
-
-      {/* Expanded content */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="grid grid-cols-1 gap-4 py-6 md:grid-cols-2 md:py-8">
-              {cat.items.map((tech, j) => (
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {cat.items.map((item, ii) => {
+              const icon = techIcons[item]
+              return (
                 <motion.div
-                  key={tech.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: j * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                  className="group/item flex items-center gap-4 rounded-xl border border-transparent px-4 py-3 transition-colors hover:border-border hover:bg-card"
+                  key={item}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                  transition={{
+                    duration: 0.4,
+                    delay: 0.65 + ci * 0.05 + ii * 0.03,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="group flex items-center gap-2.5 rounded-xl border border-border bg-card px-3.5 py-2.5 transition-all hover:border-foreground/20 hover:bg-secondary/60"
                 >
-                  {/* Circular progress */}
-                  <div className="relative h-12 w-12 shrink-0">
-                    <svg viewBox="0 0 48 48" className="h-full w-full -rotate-90">
-                      <circle
-                        cx="24"
-                        cy="24"
-                        r="20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        className="text-border"
-                      />
-                      <motion.circle
-                        cx="24"
-                        cy="24"
-                        r="20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        className="text-foreground/60 transition-colors group-hover/item:text-foreground"
-                        strokeDasharray={`${2 * Math.PI * 20}`}
-                        initial={{ strokeDashoffset: 2 * Math.PI * 20 }}
-                        animate={{ strokeDashoffset: 2 * Math.PI * 20 * (1 - tech.level / 100) }}
-                        transition={{ duration: 1, delay: 0.2 + j * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                      />
-                    </svg>
-                    <span className="absolute inset-0 flex items-center justify-center font-mono text-[10px] text-muted-foreground/50 transition-colors group-hover/item:text-foreground/70">
-                      {tech.level}
+                  {icon ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={icon}
+                      alt={item}
+                      width={18}
+                      height={18}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-[18px] w-[18px] object-contain opacity-0 transition-opacity duration-300"
+                      onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = "1" }}
+                    />
+                  ) : (
+                    <span className="flex h-[18px] w-[18px] items-center justify-center rounded font-mono text-[9px] font-bold text-muted-foreground/50">
+                      {item.slice(0, 2).toUpperCase()}
                     </span>
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm font-medium text-foreground/80 transition-colors group-hover/item:text-foreground">
-                      {tech.name}
-                    </span>
-                    {/* Thin progress bar as secondary indicator */}
-                    <div className="mt-2 h-[2px] w-full overflow-hidden rounded-full bg-border">
-                      <motion.div
-                        className="h-full rounded-full bg-foreground/30 transition-colors group-hover/item:bg-foreground/60"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${tech.level}%` }}
-                        transition={{ duration: 1, delay: 0.3 + j * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                      />
-                    </div>
-                  </div>
+                  )}
+                  <span className="font-mono text-[12px] text-muted-foreground/60 transition-colors group-hover:text-foreground/80">
+                    {item}
+                  </span>
                 </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              )
+            })}
+          </div>
+        </div>
+      ))}
     </motion.div>
   )
 }
@@ -224,7 +346,6 @@ function CategoryPanel({
 export function SkillsSection() {
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: "-10%" })
-  const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   return (
     <section id="skills" ref={sectionRef} className="py-32 md:py-40">
@@ -248,7 +369,7 @@ export function SkillsSection() {
           className="mb-16 flex items-center gap-4"
         >
           <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/50">
-            03 / Tech Stack
+            04 / Tech Stack
           </span>
           <motion.div
             className="h-px flex-1 bg-border"
@@ -259,41 +380,45 @@ export function SkillsSection() {
           />
         </motion.div>
 
-        {/* Big heading with counter */}
+        {/* Heading + count */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between"
+          className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between"
         >
           <h2 className="max-w-2xl text-[clamp(1.5rem,3vw,2.5rem)] font-medium leading-[1.2] tracking-tight text-foreground/80">
             Tools and technologies I use to bring ideas to production.
           </h2>
           <div className="flex items-baseline gap-2">
-            <motion.span
-              className="font-mono text-5xl font-bold text-foreground md:text-6xl"
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ delay: 0.5 }}
-            >
+            <span className="font-mono text-5xl font-bold text-foreground md:text-6xl">
               {allTechs.length}
-            </motion.span>
+            </span>
             <span className="text-sm text-muted-foreground/50">technologies</span>
           </div>
         </motion.div>
 
-        {/* Accordion panels */}
-        <div>
-          {categories.map((cat, i) => (
-            <CategoryPanel
-              key={cat.name}
-              cat={cat}
-              index={i}
-              isOpen={openIndex === i}
-              onToggle={() => setOpenIndex(openIndex === i ? null : i)}
-            />
-          ))}
-        </div>
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mb-4 text-center font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground/30"
+        >
+          move your cursor to interact
+        </motion.p>
+
+        {/* 3D Sphere Cloud */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={isInView ? { opacity: 1, scale: 1 } : {}}
+          transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <SphereCloud techs={allTechs} />
+        </motion.div>
+
+        {/* Icon grid by category */}
+        <TechIconGrid isInView={isInView} />
       </div>
     </section>
   )

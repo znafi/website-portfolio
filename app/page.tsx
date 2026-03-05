@@ -6,23 +6,24 @@ import { AboutSection } from "@/components/about-section"
 import { ExperienceSection } from "@/components/experience-section"
 import { ProjectsSection } from "@/components/projects-section"
 import { SkillsSection } from "@/components/skills-section"
-import { FounderSection } from "@/components/founder-section"
 import { CommandCenter } from "@/components/command-center"
 import { Footer } from "@/components/footer"
 import { Navbar } from "@/components/navbar"
 import { CursorGlow } from "@/components/cursor-glow"
 import { ScrollProgress } from "@/components/scroll-progress"
+import { ChatAssistant } from "@/components/chat-assistant"
 
 export default function Home() {
   const [commandOpen, setCommandOpen] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
 
   return (
     <>
       {/* Scroll progress bar */}
       <ScrollProgress />
 
-      {/* Noise texture overlay */}
-      <div className="noise-overlay" aria-hidden="true" />
+      {/* Noise texture (static, no animation) */}
+      <div className="noise-overlay-static" aria-hidden="true" />
 
       {/* Cursor glow */}
       <CursorGlow />
@@ -36,12 +37,14 @@ export default function Home() {
         <ExperienceSection />
         <ProjectsSection />
         <SkillsSection />
-        <FounderSection />
-        <Footer />
+        <Footer onOpenChat={() => setChatOpen(true)} />
       </main>
 
       {/* Command Center */}
       <CommandCenter isOpen={commandOpen} setIsOpen={setCommandOpen} />
+
+      {/* Chat Assistant */}
+      <ChatAssistant open={chatOpen} setOpen={setChatOpen} />
     </>
   )
 }

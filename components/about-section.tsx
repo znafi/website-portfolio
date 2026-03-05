@@ -3,7 +3,7 @@
 import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
 
-/* ---------- per-word reveal ---------- */
+/* ---------- per-word reveal (CSS-driven) ---------- */
 function WordReveal({ text, className }: { text: string; className?: string }) {
   const ref = useRef<HTMLParagraphElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-10%" })
@@ -13,19 +13,17 @@ function WordReveal({ text, className }: { text: string; className?: string }) {
     <p ref={ref} className={className}>
       {words.map((word, i) => (
         <span key={i} className="inline-block overflow-hidden">
-          <motion.span
-            className="inline-block"
-            initial={{ y: "100%", opacity: 0 }}
-            animate={isInView ? { y: "0%", opacity: 1 } : {}}
-            transition={{
-              duration: 0.5,
-              delay: i * 0.03,
-              ease: [0.16, 1, 0.3, 1],
+          <span
+            className="inline-block transition-all duration-500"
+            style={{
+              transitionDelay: `${i * 30}ms`,
+              transform: isInView ? "translateY(0)" : "translateY(100%)",
+              opacity: isInView ? 1 : 0,
             }}
           >
             {word}
             {i < words.length - 1 ? "\u00A0" : ""}
-          </motion.span>
+          </span>
         </span>
       ))}
     </p>
@@ -49,15 +47,15 @@ const cardVariants = {
 const details = [
   {
     label: "What I do",
-    text: "Full-stack engineering with a focus on web applications, browser automation, and distributed systems. From React frontends to Python backends.",
+    text: "Full-stack development across React, Python, TypeScript, and more. From polished UIs to backend services and automation pipelines, the focus is always on shipping something that works.",
   },
   {
     label: "How I think",
-    text: "Systems-first approach. I care about architecture, scalability, and writing code that future-me won\u0027t hate. Fundamentals transfer across any stack.",
+    text: "Good software isn't just functional. It's maintainable, scalable, and intentional. I try to understand the system before writing a line, which tends to lead to better decisions down the road.",
   },
   {
     label: "Beyond code",
-    text: "Founded ZStudios, a digital agency helping brands scale. I bridge engineering and business -- building products and growing companies at the same time.",
+    text: "While studying full-time, I founded ZStudios, taking it from an idea to a running agency with real clients and delivered projects. It's taught me as much about engineering as any course.",
   },
 ]
 
@@ -90,13 +88,13 @@ export function AboutSection() {
         {/* Big statement with word-by-word reveal */}
         <div className="mb-20">
           <WordReveal
-            text="I'm a software engineer who builds real products and doesn't just push pixels. I run a digital agency, ship side projects, and obsess over clean architecture."
+            text="Third-year CS student at the University of Alberta, with a running agency, shipped products, and real client work. Building in parallel with studying, not after."
             className="max-w-4xl text-[clamp(1.5rem,3.5vw,2.75rem)] font-medium leading-[1.2] tracking-tight text-foreground/90"
           />
         </div>
 
         {/* Details grid */}
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-8">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-5">
           {details.map((item, i) => (
             <motion.div
               key={item.label}
@@ -104,25 +102,19 @@ export function AboutSection() {
               variants={cardVariants}
               initial="hidden"
               animate={isInView ? "visible" : "hidden"}
-              className="group"
+              className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 shadow-md shadow-black/5 md:p-7"
               whileHover={{ y: -4 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <motion.div
-                className="mb-6 h-px w-full bg-border"
-                initial={{ scaleX: 0 }}
-                animate={isInView ? { scaleX: 1 } : {}}
-                transition={{
-                  duration: 0.8,
-                  delay: 0.4 + i * 0.15,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                style={{ originX: 0 }}
+              {/* Corner glow */}
+              <div
+                className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                style={{ background: "radial-gradient(circle, rgba(0,0,0,0.04) 0%, transparent 70%)" }}
               />
-              <h3 className="mb-4 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors group-hover:text-foreground/80">
+              <h3 className="relative mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">
                 {item.label}
               </h3>
-              <p className="text-[15px] leading-relaxed text-foreground/70">
+              <p className="relative text-[15px] leading-relaxed text-neutral-600">
                 {item.text}
               </p>
             </motion.div>

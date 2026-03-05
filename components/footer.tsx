@@ -1,8 +1,8 @@
 "use client"
 
-import { useRef } from "react"
-import { Github, ArrowUpRight, Mail } from "lucide-react"
-import { motion, useInView } from "framer-motion"
+import { useRef, useState } from "react"
+import { Github, ArrowUpRight, Mail, Linkedin, FileText, Send, CheckCircle, MessageCircle } from "lucide-react"
+import { motion, useInView, AnimatePresence } from "framer-motion"
 import { useMagnetic } from "@/hooks/use-magnetic"
 
 /* ---------- magnetic CTA button ---------- */
@@ -57,15 +57,110 @@ function RevealHeading({
   )
 }
 
-export function Footer() {
+/* ---------- inline contact form ---------- */
+function ContactForm({ isInView }: { isInView: boolean }) {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name || !email || !message) return
+    setSending(true)
+    try {
+      const res = await fetch("https://formspree.io/f/znafi@ualberta.ca", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      })
+      if (res.ok) {
+        setSent(true)
+      } else {
+        window.location.href = `mailto:znafi@ualberta.ca?subject=Message from ${encodeURIComponent(name)}&body=${encodeURIComponent(message)}%0A%0A- ${encodeURIComponent(name)} (${encodeURIComponent(email)})`
+      }
+    } catch {
+      window.location.href = `mailto:znafi@ualberta.ca?subject=Message from ${encodeURIComponent(name)}&body=${encodeURIComponent(message)}%0A%0A- ${encodeURIComponent(name)} (${encodeURIComponent(email)})`
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      className="mb-4 w-full max-w-xl"
+    >
+      <AnimatePresence mode="wait">
+        {sent ? (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center gap-3 rounded-2xl border border-border bg-card p-6 text-sm text-foreground/70"
+          >
+            <CheckCircle className="h-5 w-5 shrink-0 text-foreground/50" />
+            Thanks! I'll get back to you within 24 hours.
+          </motion.div>
+        ) : (
+          <motion.form
+            key="form"
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-3"
+          >
+            <div className="flex gap-3">
+              <input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/40 outline-none transition-colors focus:border-foreground/30 focus:bg-secondary/40"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/40 outline-none transition-colors focus:border-foreground/30 focus:bg-secondary/40"
+              />
+            </div>
+            <textarea
+              placeholder="What are you working on?"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required
+              rows={4}
+              className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/40 outline-none transition-colors focus:border-foreground/30 focus:bg-secondary/40"
+            />
+            <button
+              type="submit"
+              disabled={sending}
+              className="group inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-medium text-background transition-all hover:bg-foreground/90 active:scale-[0.97] disabled:opacity-60"
+            >
+              <Send className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              {sending ? "Sending…" : "Send message"}
+            </button>
+          </motion.form>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
+export function Footer({ onOpenChat }: { onOpenChat?: () => void }) {
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: "-10%" })
 
   const headingWords = [
-    { text: "Let's" },
-    { text: "build" },
-    { text: "something", className: "text-muted-foreground/30" },
-    { text: "great.", className: "text-muted-foreground/30" },
+    { text: "Get" },
+    { text: "in" },
+    { text: "touch.", className: "text-muted-foreground/30" },
   ]
 
   return (
@@ -79,7 +174,7 @@ export function Footer() {
           className="mb-16 flex items-center gap-4"
         >
           <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/50">
-            06 / Contact
+            05 / Contact
           </span>
           <motion.div
             className="h-px flex-1 bg-border"
@@ -100,22 +195,53 @@ export function Footer() {
             transition={{ duration: 0.7, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="mb-10 max-w-md text-[15px] leading-relaxed text-foreground/60"
           >
-            {"Always open to discussing new projects, creative ideas, or opportunities. Drop a message and let's connect."}
+            {"Open to full-time roles, internships, and freelance projects. If you have something worth building, feel free to reach out."}
           </motion.p>
+
+          {/* Inline contact form */}
+          <ContactForm isInView={isInView} />
+
+          {/* Chat nudge */}
+          {onOpenChat && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.58, ease: [0.16, 1, 0.3, 1] }}
+              className="mb-6 mt-4"
+            >
+              <button
+                onClick={onOpenChat}
+                className="group inline-flex items-center gap-2.5 rounded-full border border-border bg-foreground/[0.04] px-5 py-2.5 text-sm text-foreground/70 transition-all hover:bg-foreground/[0.08] hover:text-foreground"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Prefer to chat? Ask my AI assistant
+                <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </button>
+            </motion.div>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-wrap gap-4"
+            className="mt-6 flex flex-wrap gap-4"
           >
             <MagneticCTA
-              href="mailto:hello@zawadnafi.com"
-              className="group inline-flex items-center gap-3 rounded-full bg-foreground px-8 py-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90 active:scale-[0.97]"
+              href="mailto:znafi@ualberta.ca"
+              className="group inline-flex items-center gap-3 rounded-full border border-border px-6 py-3 text-sm text-foreground transition-all hover:border-foreground/30 hover:bg-secondary/50 active:scale-[0.97]"
             >
               <Mail className="h-4 w-4" />
-              Get in Touch
+              znafi@ualberta.ca
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </MagneticCTA>
+            <MagneticCTA
+              href="https://linkedin.com/in/zawadnafi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-8 py-4 text-sm text-foreground transition-all hover:border-foreground/30 hover:bg-secondary/50 active:scale-[0.97]"
+            >
+              <Linkedin className="h-4 w-4" />
+              LinkedIn
             </MagneticCTA>
             <MagneticCTA
               href="https://github.com/znafi"
@@ -125,6 +251,15 @@ export function Footer() {
             >
               <Github className="h-4 w-4" />
               GitHub
+            </MagneticCTA>
+            <MagneticCTA
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-8 py-4 text-sm text-foreground transition-all hover:border-foreground/30 hover:bg-secondary/50 active:scale-[0.97]"
+            >
+              <FileText className="h-4 w-4" />
+              Resume
             </MagneticCTA>
           </motion.div>
         </div>
@@ -138,10 +273,19 @@ export function Footer() {
         >
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <p className="text-xs text-muted-foreground/30">
-              Designed and built by Zawad Nafi
+              Designed, built & shipped by Zawad Nafi
             </p>
 
             <div className="flex items-center gap-6">
+              <a
+                href="https://linkedin.com/in/zawadnafi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground/30 transition-colors hover:text-foreground"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="h-4 w-4" />
+              </a>
               <a
                 href="https://github.com/znafi"
                 target="_blank"

@@ -71,7 +71,7 @@ export function FounderSection() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-foreground/40"
               >
-                {"< replace with agency image />"}
+                ZStudios · Est. 2024
               </motion.p>
 
               <motion.h2
@@ -80,8 +80,8 @@ export function FounderSection() {
                 transition={{ duration: 0.7, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 className="mb-4 text-[clamp(2rem,4vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-foreground"
               >
-                I also run a{" "}
-                <span className="text-foreground/30">digital agency.</span>
+                Engineering meets{" "}
+                <span className="text-foreground/30">brand strategy.</span>
               </motion.h2>
 
               <motion.p
@@ -90,9 +90,7 @@ export function FounderSection() {
                 transition={{ duration: 0.7, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 className="mb-8 max-w-lg text-[15px] leading-relaxed text-foreground/60"
               >
-                ZStudios bridges technology and marketing, helping brands
-                establish a powerful digital presence through web development,
-                SEO, content strategy, and data-driven growth.
+                ZStudios is a digital agency focused on helping brands establish a strong online presence through clean engineering, thoughtful design, and practical marketing. Built from scratch, operated end-to-end.
               </motion.p>
 
               <motion.div
