@@ -189,7 +189,7 @@ export function HeroSection() {
               className="tilt-card image-hover-zoom relative h-[420px] w-[340px] overflow-hidden rounded-2xl border border-border"
             >
               <div
-                className={`h-full w-full ${imageInView ? "animate-image-reveal" : "opacity-0"}`}
+                className={`relative h-full w-full ${imageInView ? "animate-image-reveal" : "opacity-0"}`}
               >
                 <Image
                   src="/images/portrait.jpg"
