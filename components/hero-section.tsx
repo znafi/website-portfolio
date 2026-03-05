@@ -12,7 +12,7 @@ import {
 } from "framer-motion"
 import { useMagnetic } from "@/hooks/use-magnetic"
 
-/* ---------- text scramble (kept from original) ---------- */
+/* ---------- text scramble ---------- */
 function useTextScramble(text: string, trigger: boolean, delay: number = 0) {
   const [display, setDisplay] = useState("")
   const chars = "!<>-_\\/[]{}#$%^&*()=+~`|;:,.?"
@@ -46,10 +46,9 @@ function useTextScramble(text: string, trigger: boolean, delay: number = 0) {
   return display
 }
 
-/* ---------- rotating text carousel ---------- */
+/* ---------- rotating text ---------- */
 const rotatingTexts = [
   "full-stack engineer",
-  "agency founder",
   "automation nerd",
   "clean code obsessive",
   "product builder",
@@ -103,37 +102,18 @@ function FloatingParticles() {
         <motion.div
           key={p.id}
           className="absolute rounded-full bg-foreground/[0.07]"
-          style={{
-            width: p.size,
-            height: p.size,
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            x: [0, 15, 0],
-            opacity: [0, 0.7, 0],
-          }}
-          transition={{
-            duration: p.duration,
-            repeat: Infinity,
-            delay: p.delay,
-            ease: "easeInOut",
-          }}
+          style={{ width: p.size, height: p.size, left: `${p.x}%`, top: `${p.y}%` }}
+          animate={{ y: [0, -30, 0], x: [0, 15, 0], opacity: [0, 0.7, 0] }}
+          transition={{ duration: p.duration, repeat: Infinity, delay: p.delay, ease: "easeInOut" }}
         />
       ))}
     </div>
   )
 }
 
-/* ---------- magnetic button wrapper ---------- */
-function MagneticButton({
-  children,
-  className,
-  ...props
-}: React.ComponentProps<"a">) {
+/* ---------- magnetic button ---------- */
+function MagneticButton({ children, className, ...props }: React.ComponentProps<"a">) {
   const { ref, handleMouseMove, handleMouseLeave } = useMagnetic(0.25)
-
   return (
     <a
       ref={ref as React.Ref<HTMLAnchorElement>}
@@ -147,7 +127,7 @@ function MagneticButton({
   )
 }
 
-/* ---------- main component ---------- */
+/* ---------- main ---------- */
 export function HeroSection() {
   const [mounted, setMounted] = useState(false)
   const name = useTextScramble("Zawad Nafi", mounted, 600)
@@ -157,65 +137,46 @@ export function HeroSection() {
     target: sectionRef,
     offset: ["start start", "end start"],
   })
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-  })
-  const imageY = useTransform(smoothProgress, [0, 1], [0, 80])
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
   const textY = useTransform(smoothProgress, [0, 1], [0, -40])
   const opacity = useTransform(smoothProgress, [0, 0.5], [1, 0])
+  const imageScale = useTransform(smoothProgress, [0, 1], [1, 1.08])
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  useEffect(() => setMounted(true), [])
 
   const imageRef = useRef<HTMLDivElement>(null)
   const [imageInView, setImageInView] = useState(false)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setImageInView(true)
-      },
+      ([entry]) => { if (entry.isIntersecting) setImageInView(true) },
       { threshold: 0.3 }
     )
     if (imageRef.current) observer.observe(imageRef.current)
     return () => observer.disconnect()
   }, [])
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      const el = e.currentTarget
-      const rect = el.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
-      el.style.transform = `perspective(800px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`
-    },
-    []
-  )
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget
+    const rect = el.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width - 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5
+    el.style.transform = `perspective(800px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`
+  }, [])
 
-  const handleMouseLeave = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      e.currentTarget.style.transform =
-        "perspective(800px) rotateY(0deg) rotateX(0deg)"
-    },
-    []
-  )
+  const handleMouseLeave = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.transform = "perspective(800px) rotateY(0deg) rotateX(0deg)"
+  }, [])
 
-  /* stagger spring variants */
   const containerVariants = {
     hidden: {},
-    visible: {
-      transition: { staggerChildren: 0.12, delayChildren: 0.3 },
-    },
+    visible: { transition: { staggerChildren: 0.12, delayChildren: 0.3 } },
   }
 
   const childVariants = {
     hidden: { opacity: 0, y: 40, filter: "blur(4px)" },
     visible: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
+      opacity: 1, y: 0, filter: "blur(0px)",
       transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
     },
   }
@@ -224,26 +185,53 @@ export function HeroSection() {
     <section
       id="hero"
       ref={sectionRef}
-      className="relative flex min-h-screen flex-col justify-center overflow-hidden px-6 pt-24"
+      className="relative flex min-h-screen flex-col overflow-hidden px-6 pt-24"
     >
       <FloatingParticles />
 
-      <motion.div
-        className="mx-auto w-full max-w-6xl"
-        style={{ y: textY, opacity }}
-      >
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_auto] lg:gap-20">
-          {/* Text content */}
+      <motion.div className="mx-auto flex w-full max-w-6xl flex-1 flex-col" style={{ opacity }}>
+        {/* --- Portrait at the top --- */}
+        <motion.div
+          ref={imageRef}
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={mounted ? { opacity: 1, scale: 1 } : {}}
+          transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-12 flex justify-center md:mb-16"
+        >
+          <motion.div style={{ scale: imageScale }}>
+            <div
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              className="tilt-card image-hover-zoom relative h-[180px] w-[180px] overflow-hidden rounded-full border-2 border-border md:h-[220px] md:w-[220px]"
+            >
+              <div className={`relative h-full w-full ${imageInView ? "animate-image-reveal" : "opacity-0"}`}>
+                <Image
+                  src="/images/portrait.jpg"
+                  alt="Portrait of Zawad Nafi"
+                  fill
+                  className="object-cover"
+                  sizes="220px"
+                  priority
+                />
+              </div>
+              <div className="absolute inset-0 animate-shimmer" />
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* --- Text content --- */}
+        <motion.div
+          className="flex flex-1 flex-col items-center text-center"
+          style={{ y: textY }}
+        >
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate={mounted ? "visible" : "hidden"}
+            className="flex flex-col items-center"
           >
             {/* Status */}
-            <motion.div
-              variants={childVariants}
-              className="mb-10 flex items-center gap-3"
-            >
+            <motion.div variants={childVariants} className="mb-8 flex items-center gap-3">
               <div className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground/50" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-foreground" />
@@ -253,17 +241,29 @@ export function HeroSection() {
               </span>
             </motion.div>
 
-            {/* Name with scramble */}
+            {/* Name */}
             <motion.div variants={childVariants} className="mb-6 overflow-hidden">
               <h1 className="font-mono text-[clamp(2.5rem,8vw,6.5rem)] font-bold leading-[0.9] tracking-tighter text-foreground">
                 {name || "\u00A0"}
               </h1>
             </motion.div>
 
+            {/* Role badges - Founder & SWE emphasized */}
+            <motion.div variants={childVariants} className="mb-6 flex flex-wrap items-center justify-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full border border-foreground/20 bg-foreground/10 px-5 py-2 text-sm font-semibold tracking-wide text-foreground backdrop-blur-sm md:text-base">
+                <span className="h-1.5 w-1.5 rounded-full bg-foreground animate-pulse" />
+                Software Engineer
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-foreground/20 bg-foreground/10 px-5 py-2 text-sm font-semibold tracking-wide text-foreground backdrop-blur-sm md:text-base">
+                <span className="h-1.5 w-1.5 rounded-full bg-foreground animate-pulse" />
+                Agency Founder
+              </span>
+            </motion.div>
+
             {/* Rotating text carousel */}
             <motion.div variants={childVariants} className="mb-4 overflow-hidden">
-              <p className="font-mono text-[clamp(1.2rem,3vw,2.2rem)] font-medium leading-[1.2] tracking-tight">
-                {"I'm a "}
+              <p className="font-mono text-[clamp(1rem,2.5vw,1.5rem)] font-medium leading-[1.2] tracking-tight text-muted-foreground">
+                {"also a "}
                 <RotatingText />
               </p>
             </motion.div>
@@ -284,11 +284,8 @@ export function HeroSection() {
               </p>
             </motion.div>
 
-            {/* CTAs with magnetic effect */}
-            <motion.div
-              variants={childVariants}
-              className="flex flex-wrap items-center gap-4"
-            >
+            {/* CTAs */}
+            <motion.div variants={childVariants} className="flex flex-wrap items-center justify-center gap-4">
               <MagneticButton
                 href="#projects"
                 className="group inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-colors hover:bg-foreground/90 active:scale-[0.97]"
@@ -316,42 +313,7 @@ export function HeroSection() {
               </MagneticButton>
             </motion.div>
           </motion.div>
-
-          {/* Portrait image with tilt + parallax */}
-          <motion.div
-            ref={imageRef}
-            style={{ y: imageY }}
-            initial={{ opacity: 0, y: 50 }}
-            animate={mounted ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="relative hidden lg:block"
-          >
-            <div
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-              className="tilt-card image-hover-zoom relative h-[420px] w-[340px] overflow-hidden rounded-2xl border border-border"
-            >
-              <div
-                className={`relative h-full w-full ${imageInView ? "animate-image-reveal" : "opacity-0"}`}
-              >
-                <Image
-                  src="/images/portrait.jpg"
-                  alt="Portrait of Zawad Nafi"
-                  fill
-                  className="object-cover"
-                  sizes="340px"
-                  priority
-                />
-              </div>
-              {/* Overlay shimmer */}
-              <div className="absolute inset-0 animate-shimmer" />
-            </div>
-            {/* Caption */}
-            <p className="mt-4 text-center font-mono text-[11px] text-muted-foreground/30">
-              {"< replace with your photo />"}
-            </p>
-          </motion.div>
-        </div>
+        </motion.div>
       </motion.div>
 
       {/* Scroll indicator */}
@@ -359,10 +321,10 @@ export function HeroSection() {
         initial={{ opacity: 0 }}
         animate={mounted ? { opacity: 1 } : {}}
         transition={{ delay: 2, duration: 0.7 }}
-        className="mx-auto mt-auto mb-10 w-full max-w-6xl"
+        className="mx-auto mb-10 flex w-full max-w-6xl justify-center"
       >
         <motion.div
-          className="flex flex-col items-start gap-2"
+          className="flex flex-col items-center gap-2"
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >

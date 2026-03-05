@@ -1,13 +1,7 @@
 "use client"
 
 import { useRef } from "react"
-import Image from "next/image"
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useInView,
-} from "framer-motion"
+import { motion, useInView } from "framer-motion"
 
 /* ---------- per-word reveal ---------- */
 function WordReveal({ text, className }: { text: string; className?: string }) {
@@ -71,13 +65,6 @@ export function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: "-15%" })
 
-  const photoRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: photoRef,
-    offset: ["start end", "end start"],
-  })
-  const photoY = useTransform(scrollYProgress, [0, 1], [40, -40])
-
   return (
     <section id="about" ref={sectionRef} className="px-6 py-32 md:py-40">
       <div className="mx-auto max-w-6xl">
@@ -100,66 +87,46 @@ export function AboutSection() {
           />
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-16 lg:grid-cols-[1fr_320px] lg:gap-20">
-          <div>
-            {/* Big statement with word-by-word reveal */}
-            <div className="mb-20">
-              <WordReveal
-                text="I'm a software engineer who builds real products and doesn't just push pixels. I run a digital agency, ship side projects, and obsess over clean architecture."
-                className="max-w-4xl text-[clamp(1.5rem,3.5vw,2.75rem)] font-medium leading-[1.2] tracking-tight text-foreground/90"
-              />
-            </div>
+        {/* Big statement with word-by-word reveal */}
+        <div className="mb-20">
+          <WordReveal
+            text="I'm a software engineer who builds real products and doesn't just push pixels. I run a digital agency, ship side projects, and obsess over clean architecture."
+            className="max-w-4xl text-[clamp(1.5rem,3.5vw,2.75rem)] font-medium leading-[1.2] tracking-tight text-foreground/90"
+          />
+        </div>
 
-            {/* Details grid with staggered spring entrance */}
-            <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-8">
-              {details.map((item, i) => (
-                <motion.div
-                  key={item.label}
-                  custom={i}
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate={isInView ? "visible" : "hidden"}
-                  className="group"
-                  whileHover={{ y: -4 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
-                  <motion.div
-                    className="mb-6 h-px w-full bg-border"
-                    initial={{ scaleX: 0 }}
-                    animate={isInView ? { scaleX: 1 } : {}}
-                    transition={{
-                      duration: 0.8,
-                      delay: 0.4 + i * 0.15,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    style={{ originX: 0 }}
-                  />
-                  <h3 className="mb-4 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors group-hover:text-foreground/80">
-                    {item.label}
-                  </h3>
-                  <p className="text-[15px] leading-relaxed text-foreground/70">
-                    {item.text}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          {/* Photo with parallax */}
-          <motion.div ref={photoRef} style={{ y: photoY }} className="relative">
-            <div className="image-hover-zoom sticky top-32 overflow-hidden rounded-2xl border border-border">
-              <Image
-                src="/images/portrait.jpg"
-                alt="Zawad Nafi"
-                width={320}
-                height={400}
-                className="h-auto w-full object-cover grayscale transition-all duration-700 hover:grayscale-0"
+        {/* Details grid */}
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-8">
+          {details.map((item, i) => (
+            <motion.div
+              key={item.label}
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              animate={isInView ? "visible" : "hidden"}
+              className="group"
+              whileHover={{ y: -4 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              <motion.div
+                className="mb-6 h-px w-full bg-border"
+                initial={{ scaleX: 0 }}
+                animate={isInView ? { scaleX: 1 } : {}}
+                transition={{
+                  duration: 0.8,
+                  delay: 0.4 + i * 0.15,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                style={{ originX: 0 }}
               />
-            </div>
-            <p className="mt-3 text-center font-mono text-[11px] text-muted-foreground/30">
-              {"< replace with your photo />"}
-            </p>
-          </motion.div>
+              <h3 className="mb-4 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors group-hover:text-foreground/80">
+                {item.label}
+              </h3>
+              <p className="text-[15px] leading-relaxed text-foreground/70">
+                {item.text}
+              </p>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
