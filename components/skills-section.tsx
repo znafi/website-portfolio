@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState, useCallback } from "react"
+import React, { useRef, useEffect, useState, useCallback } from "react"
 import { motion, useInView } from "framer-motion"
 
 /* ---------- data ---------- */
@@ -24,6 +24,10 @@ const categories = [
   {
     name: "DevOps & Tools",
     items: ["Git", "Docker", "GitHub Actions", "Playwright", "VS Code", "Postman"],
+  },
+  {
+    name: "CMS",
+    items: ["Drupal"],
   },
 ]
 
@@ -258,7 +262,7 @@ const techIcons: Record<string, string> = {
   "TypeScript":      `${D}/typescript/typescript-original.svg`,
   "JavaScript":      `${D}/javascript/javascript-original.svg`,
   "Python":          `${D}/python/python-original.svg`,
-  "SQL":             `${D}/azuresqldatabase/azuresqldatabase-original.svg`,
+  "SQL":             `${D}/mysql/mysql-original.svg`,
   "C++":             `${D}/cplusplus/cplusplus-original.svg`,
   "React":           `${D}/react/react-original.svg`,
   "Next.js":         `${D}/nextjs/nextjs-original.svg`,
@@ -281,6 +285,32 @@ const techIcons: Record<string, string> = {
   "VS Code":         `${D}/vscode/vscode-original.svg`,
   "Postman":         `${D}/postman/postman-original.svg`,
   "Playwright":      `${D}/playwright/playwright-original.svg`,
+  "Drupal":          `${D}/drupal/drupal-original.svg`,
+}
+
+/* ---------- single icon with fallback ---------- */
+function TechImg({ src, alt }: { src: string; alt: string }) {
+  const [err, setErr] = React.useState(false)
+  if (err) {
+    return (
+      <span className="flex h-[18px] w-[18px] items-center justify-center rounded font-mono text-[9px] font-bold text-muted-foreground/50">
+        {alt.slice(0, 2).toUpperCase()}
+      </span>
+    )
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      width={18}
+      height={18}
+      loading="lazy"
+      decoding="async"
+      className="h-[18px] w-[18px] object-contain"
+      onError={() => setErr(true)}
+    />
+  )
 }
 
 /* ---------- icon grid ---------- */
@@ -313,17 +343,7 @@ function TechIconGrid({ isInView }: { isInView: boolean }) {
                   className="group flex items-center gap-2.5 rounded-xl border border-border bg-card px-3.5 py-2.5 transition-all hover:border-foreground/20 hover:bg-secondary/60"
                 >
                   {icon ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={icon}
-                      alt={item}
-                      width={18}
-                      height={18}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-[18px] w-[18px] object-contain opacity-0 transition-opacity duration-300"
-                      onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = "1" }}
-                    />
+                    <TechImg src={icon} alt={item} />
                   ) : (
                     <span className="flex h-[18px] w-[18px] items-center justify-center rounded font-mono text-[9px] font-bold text-muted-foreground/50">
                       {item.slice(0, 2).toUpperCase()}

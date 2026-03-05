@@ -227,7 +227,7 @@ export function HeroSection() {
             >
               <div className={`relative h-full w-full ${imageInView ? "animate-image-reveal" : "opacity-0"}`}>
                 <Image
-                  src="/images/portrait.jpg"
+                  src="/images/portrait.png"
                   alt="Portrait of Zawad Nafi"
                   fill
                   className="object-cover"

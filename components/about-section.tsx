@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef } from "react"
+import { Code2, Lightbulb, Rocket } from "lucide-react"
 import { motion, useInView } from "framer-motion"
 
 /* ---------- per-word reveal (CSS-driven) ---------- */
@@ -46,16 +47,22 @@ const cardVariants = {
 
 const details = [
   {
+    number: "01",
     label: "What I do",
     text: "Full-stack development across React, Python, TypeScript, and more. From polished UIs to backend services and automation pipelines, the focus is always on shipping something that works.",
+    icon: Code2,
   },
   {
+    number: "02",
     label: "How I think",
     text: "Good software isn't just functional. It's maintainable, scalable, and intentional. I try to understand the system before writing a line, which tends to lead to better decisions down the road.",
+    icon: Lightbulb,
   },
   {
+    number: "03",
     label: "Beyond code",
     text: "While studying full-time, I founded ZStudios, taking it from an idea to a running agency with real clients and delivered projects. It's taught me as much about engineering as any course.",
+    icon: Rocket,
   },
 ]
 
@@ -95,30 +102,41 @@ export function AboutSection() {
 
         {/* Details grid */}
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-5">
-          {details.map((item, i) => (
-            <motion.div
-              key={item.label}
-              custom={i}
-              variants={cardVariants}
-              initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
-              className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 shadow-md shadow-black/5 md:p-7"
-              whileHover={{ y: -4 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              {/* Corner glow */}
-              <div
-                className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                style={{ background: "radial-gradient(circle, rgba(0,0,0,0.04) 0%, transparent 70%)" }}
-              />
-              <h3 className="relative mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">
-                {item.label}
-              </h3>
-              <p className="relative text-[15px] leading-relaxed text-neutral-600">
-                {item.text}
-              </p>
-            </motion.div>
-          ))}
+          {details.map((item, i) => {
+            const Icon = item.icon
+            return (
+              <motion.div
+                key={item.label}
+                custom={i}
+                variants={cardVariants}
+                initial="hidden"
+                animate={isInView ? "visible" : "hidden"}
+                className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-[0_2px_20px_rgba(0,0,0,0.12)] transition-all duration-300 hover:shadow-[0_8px_40px_rgba(0,0,0,0.18)] md:p-7"
+                whileHover={{ y: -5 }}
+                transition={{ type: "spring", stiffness: 300, damping: 22 }}
+              >
+                {/* Icon + Number row */}
+                <div className="mb-5 flex items-center justify-between">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-900">
+                    <Icon className="h-5 w-5 text-white" strokeWidth={2} />
+                  </div>
+                  <span className="font-mono text-[11px] font-semibold tracking-[0.25em] text-neutral-300">
+                    {item.number}
+                  </span>
+                </div>
+
+                {/* Label */}
+                <h3 className="mb-3 text-2xl font-extrabold tracking-tight text-neutral-900 md:text-3xl">
+                  {item.label}
+                </h3>
+
+                {/* Body */}
+                <p className="text-[14px] font-semibold leading-relaxed text-neutral-800">
+                  {item.text}
+                </p>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </section>
