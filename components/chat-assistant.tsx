@@ -257,7 +257,7 @@ export function ChatAssistant({
 
   return (
     <>
-      {/* Nudge bubble */}
+      {/* Nudge bubble — pointer-events-none so it never blocks scrolling */}
       <AnimatePresence>
         {nudgeVisible && !open && (
           <motion.div
@@ -265,14 +265,15 @@ export function ChatAssistant({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.92 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-24 right-6 z-50 cursor-pointer"
-            onClick={handleOpen}
+            className="pointer-events-none fixed bottom-24 right-6 z-50"
           >
-            <div className="relative rounded-2xl rounded-br-sm border border-border bg-card px-4 py-3 shadow-xl shadow-black/30">
+            <div
+              className="pointer-events-auto cursor-pointer rounded-2xl rounded-br-sm border border-border bg-card px-4 py-3 shadow-xl shadow-black/30"
+              onClick={handleOpen}
+            >
               <p className="whitespace-nowrap text-[13px] font-medium text-foreground">
                 Have questions? Ask me anything 👋
               </p>
-              {/* little arrow pointing down-right */}
               <div className="absolute -bottom-2 right-4 h-3 w-3 rotate-45 border-b border-r border-border bg-card" />
             </div>
           </motion.div>
@@ -280,47 +281,23 @@ export function ChatAssistant({
       </AnimatePresence>
 
       {/* Toggle button */}
-      <motion.button
+      <button
         onClick={() => (open ? setOpen(false) : handleOpen())}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-lg shadow-black/30 transition-colors hover:bg-foreground/90"
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 touch-manipulation items-center justify-center rounded-full bg-foreground text-background shadow-lg shadow-black/30 transition-transform hover:scale-105 active:scale-95"
         aria-label={open ? "Close chat" : "Open chat"}
       >
-        <AnimatePresence mode="wait" initial={false}>
-          {open ? (
-            <motion.div
-              key="close"
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <X className="h-5 w-5" />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="open"
-              initial={{ rotate: 90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: -90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <MessageCircle className="h-5 w-5" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
+        {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+      </button>
 
-      {/* Chat panel */}
+      {/* Chat panel — full screen on mobile, floating panel on desktop */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-24 right-6 z-50 flex h-[520px] w-[380px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/40"
+            className="fixed inset-0 z-50 flex flex-col bg-card md:inset-auto md:bottom-24 md:right-6 md:h-[520px] md:w-[380px] md:rounded-2xl md:border md:border-border md:shadow-2xl md:shadow-black/40"
           >
             {/* Header */}
             <div className="flex items-center gap-3 border-b border-border px-5 py-4">
@@ -329,15 +306,24 @@ export function ChatAssistant({
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">
-                  Portfolio Assistant
+                  Zawad&apos;s Assistant
                 </p>
                 <p className="text-[11px] text-muted-foreground/50">
-                  Zawad's assistant
+                  Ask me anything
                 </p>
               </div>
-              <div className="ml-auto flex h-2 w-2 items-center justify-center">
-                <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-green-400/60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
+              <div className="ml-auto flex items-center gap-3">
+                <div className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-green-400/60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
+                </div>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground md:hidden"
+                  aria-label="Close chat"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             </div>
 

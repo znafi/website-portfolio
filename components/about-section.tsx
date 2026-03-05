@@ -51,18 +51,21 @@ const details = [
     label: "What I do",
     text: "Full-stack development across React, Python, TypeScript, and more. From polished UIs to backend services and automation pipelines, the focus is always on shipping something that works.",
     icon: Code2,
+    iconBg: "#4f46e5",
   },
   {
     number: "02",
     label: "How I think",
     text: "Good software isn't just functional. It's maintainable, scalable, and intentional. I try to understand the system before writing a line, which tends to lead to better decisions down the road.",
     icon: Lightbulb,
+    iconBg: "#eab308",
   },
   {
     number: "03",
     label: "Beyond code",
     text: "While studying full-time, I founded ZStudios, taking it from an idea to a running agency with real clients and delivered projects. It's taught me as much about engineering as any course.",
     icon: Rocket,
+    iconBg: "#10b981",
   },
 ]
 
@@ -117,8 +120,8 @@ export function AboutSection() {
               >
                 {/* Icon + Number row */}
                 <div className="mb-5 flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-900">
-                    <Icon className="h-5 w-5 text-white" strokeWidth={2} />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: item.iconBg }}>
+                    <Icon className="h-5 w-5 text-white" strokeWidth={2.5} />
                   </div>
                   <span className="font-mono text-[11px] font-semibold tracking-[0.25em] text-neutral-300">
                     {item.number}
