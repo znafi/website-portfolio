@@ -11,12 +11,16 @@ import { CommandCenter } from "@/components/command-center"
 import { Footer } from "@/components/footer"
 import { Navbar } from "@/components/navbar"
 import { CursorGlow } from "@/components/cursor-glow"
+import { ScrollProgress } from "@/components/scroll-progress"
 
 export default function Home() {
   const [commandOpen, setCommandOpen] = useState(false)
 
   return (
     <>
+      {/* Scroll progress bar */}
+      <ScrollProgress />
+
       {/* Noise texture overlay */}
       <div className="noise-overlay" aria-hidden="true" />
 

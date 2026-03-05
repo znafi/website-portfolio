@@ -1,9 +1,9 @@
 "use client"
 
-import { useReveal } from "@/hooks/use-reveal"
+import { useRef, useCallback, useState } from "react"
 import { ArrowUpRight } from "lucide-react"
-import { useState, useCallback, useRef } from "react"
 import Image from "next/image"
+import { motion, useInView } from "framer-motion"
 
 const projects = [
   {
@@ -44,41 +44,65 @@ const projects = [
   },
 ]
 
+/* ---------- project card with spotlight + tilt ---------- */
 function ProjectCard({
   project,
   index,
-  visible,
 }: {
   project: (typeof projects)[0]
   index: number
-  visible: boolean
 }) {
   const cardRef = useRef<HTMLAnchorElement>(null)
   const [isHovered, setIsHovered] = useState(false)
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-    const el = e.currentTarget
-    const rect = el.getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width - 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5
-    el.style.transform = `perspective(1000px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) scale(1.01)`
-  }, [])
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      const el = e.currentTarget
+      const rect = el.getBoundingClientRect()
+      const x = (e.clientX - rect.left) / rect.width
+      const y = (e.clientY - rect.top) / rect.height
+      el.style.setProperty("--spotlight-x", `${x * 100}%`)
+      el.style.setProperty("--spotlight-y", `${y * 100}%`)
 
-  const handleMouseLeave = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.currentTarget.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1)"
-    setIsHovered(false)
-  }, [])
+      const rx = (x - 0.5) * 6
+      const ry = (y - 0.5) * -6
+      el.style.transform = `perspective(1000px) rotateY(${rx}deg) rotateX(${ry}deg) scale(1.01)`
+    },
+    []
+  )
+
+  const handleMouseLeave = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.currentTarget.style.transform =
+        "perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1)"
+      setIsHovered(false)
+    },
+    []
+  )
+
+  const directions = [
+    { x: -60, y: 40 },
+    { x: 60, y: 40 },
+    { x: -60, y: -40 },
+    { x: 60, y: -40 },
+  ]
+  const dir = directions[index % 4]
 
   return (
-    <a
+    <motion.a
       ref={cardRef}
       href={project.github}
       target="_blank"
       rel="noopener noreferrer"
-      className={`tilt-card group relative block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-700 ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-      }`}
-      style={{ transitionDelay: `${300 + index * 150}ms` }}
+      className="spotlight-card glow-border tilt-card group relative block overflow-hidden rounded-2xl border border-border bg-card"
+      initial={{ opacity: 0, x: dir.x, y: dir.y }}
+      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      viewport={{ once: true, margin: "-10%" }}
+      transition={{
+        duration: 0.8,
+        delay: index * 0.12,
+        ease: [0.16, 1, 0.3, 1],
+      }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
@@ -94,10 +118,17 @@ function ProjectCard({
         />
         <div className="absolute inset-0 bg-background/30 transition-opacity duration-500 group-hover:opacity-0" />
 
-        {/* Number overlay */}
-        <span className="absolute bottom-4 left-4 font-mono text-[11px] text-foreground/40">
+        {/* Number overlay with typewriter feel */}
+        <motion.span
+          className="absolute bottom-4 left-4 font-mono text-[11px] text-foreground/40"
+          initial={{ width: 0 }}
+          whileInView={{ width: "auto" }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.4 + index * 0.12 }}
+          style={{ overflow: "hidden", whiteSpace: "nowrap" }}
+        >
           {project.number}
-        </span>
+        </motion.span>
 
         {/* Arrow */}
         <div
@@ -119,7 +150,7 @@ function ProjectCard({
       </div>
 
       {/* Info */}
-      <div className="p-6">
+      <div className="relative z-[2] p-6">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-foreground">
             {project.title}
@@ -129,45 +160,57 @@ function ProjectCard({
           {project.description}
         </p>
         <div className="flex flex-wrap gap-2">
-          {project.tech.map((t) => (
-            <span
+          {project.tech.map((t, j) => (
+            <motion.span
               key={t}
               className="rounded-full border border-border bg-secondary/50 px-2.5 py-1 font-mono text-[11px] text-muted-foreground/60 transition-colors group-hover:text-muted-foreground"
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 + index * 0.12 + j * 0.05 }}
             >
               {t}
-            </span>
+            </motion.span>
           ))}
         </div>
       </div>
-    </a>
+    </motion.a>
   )
 }
 
+/* ---------- main component ---------- */
 export function ProjectsSection() {
-  const { ref, visible } = useReveal(0.05)
+  const sectionRef = useRef<HTMLElement>(null)
+  const isInView = useInView(sectionRef, { once: true, margin: "-10%" })
 
   return (
-    <section id="projects" ref={ref} className="px-6 py-32 md:py-40">
+    <section id="projects" ref={sectionRef} className="px-6 py-32 md:py-40">
       <div className="mx-auto max-w-6xl">
         {/* Section label */}
-        <div
-          className={`mb-16 flex items-center gap-4 transition-all duration-700 ${
-            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-16 flex items-center gap-4"
         >
           <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/50">
             02 / Selected Work
           </span>
-          <div
-            className={`h-px flex-1 bg-border ${visible ? "animate-line-grow" : "scale-x-0"}`}
+          <motion.div
+            className="h-px flex-1 bg-border"
+            initial={{ scaleX: 0 }}
+            animate={isInView ? { scaleX: 1 } : {}}
+            transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            style={{ originX: 0 }}
           />
-        </div>
+        </motion.div>
 
         {/* Header */}
-        <div
-          className={`mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end transition-all duration-700 delay-200 ${
-            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end"
         >
           <h2 className="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-[1] tracking-tight text-foreground">
             Projects
@@ -176,22 +219,17 @@ export function ProjectsSection() {
             href="https://github.com/znafi"
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="animated-underline group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             View all on GitHub
             <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
-        </div>
+        </motion.div>
 
         {/* Project grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {projects.map((project, index) => (
-            <ProjectCard
-              key={project.title}
-              project={project}
-              index={index}
-              visible={visible}
-            />
+            <ProjectCard key={project.title} project={project} index={index} />
           ))}
         </div>
       </div>
