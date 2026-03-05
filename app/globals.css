@@ -206,3 +206,123 @@ html {
 .image-hover-zoom:hover img {
   transform: scale(1.05);
 }
+
+/* Spotlight card effect */
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlight-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+    rgba(237, 237, 237, 0.06),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+/* Glow border on hover */
+.glow-border {
+  position: relative;
+}
+
+.glow-border::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(
+    135deg,
+    rgba(237, 237, 237, 0.15),
+    transparent 50%,
+    rgba(237, 237, 237, 0.08)
+  );
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.glow-border:hover::after {
+  opacity: 1;
+}
+
+/* Animated underline */
+.animated-underline {
+  background-image: linear-gradient(
+    to right,
+    var(--foreground),
+    var(--foreground)
+  );
+  background-size: 0% 1px;
+  background-position: left bottom;
+  background-repeat: no-repeat;
+  transition: background-size 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animated-underline:hover {
+  background-size: 100% 1px;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(237, 237, 237, 0); }
+  50% { box-shadow: 0 0 20px 2px rgba(237, 237, 237, 0.1); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Flashy role badge shimmer border */
+@keyframes badge-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.role-badge-swe,
+.role-badge-founder {
+  position: relative;
+}
+
+.role-badge-swe::before,
+.role-badge-founder::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(237, 237, 237, 0.3) 25%,
+    rgba(237, 237, 237, 0.5) 50%,
+    rgba(237, 237, 237, 0.3) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: badge-shimmer 3s linear infinite;
+  z-index: -1;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 1px;
+}
+
+.role-badge-founder::before {
+  animation-delay: 1.5s;
+}
