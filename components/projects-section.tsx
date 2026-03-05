@@ -1,9 +1,9 @@
 "use client"
 
-import { useRef, useCallback, useState } from "react"
+import { useRef, useCallback, useState, useEffect } from "react"
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
-import { motion, useInView, useMotionValue, useTransform, animate, PanInfo } from "framer-motion"
+import { motion, useInView, AnimatePresence } from "framer-motion"
 
 const projects = [
   {
@@ -44,15 +44,12 @@ const projects = [
   },
 ]
 
-/* ---------- swipable card ---------- */
+/* ---------- single project card ---------- */
 function ProjectCard({
   project,
-  isActive,
 }: {
   project: (typeof projects)[0]
-  isActive: boolean
 }) {
-  const cardRef = useRef<HTMLAnchorElement>(null)
   const [isHovered, setIsHovered] = useState(false)
 
   const handleMouseMove = useCallback(
@@ -69,19 +66,15 @@ function ProjectCard({
 
   return (
     <motion.a
-      ref={cardRef}
       href={project.github}
       target="_blank"
       rel="noopener noreferrer"
-      className="spotlight-card glow-border group relative block w-[85vw] max-w-[480px] shrink-0 snap-center overflow-hidden rounded-2xl border border-border bg-card md:w-[440px]"
-      animate={{
-        scale: isActive ? 1 : 0.92,
-        opacity: isActive ? 1 : 0.5,
-      }}
-      transition={{ type: "spring", stiffness: 260, damping: 24 }}
+      className="spotlight-card glow-border group relative block h-full w-full overflow-hidden rounded-2xl border border-border bg-card"
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       {/* Image */}
       <div className="image-hover-zoom relative aspect-[16/10] w-full overflow-hidden">
@@ -90,7 +83,7 @@ function ProjectCard({
           alt={`${project.title} project screenshot`}
           fill
           className="object-cover"
-          sizes="(max-width: 768px) 85vw, 440px"
+          sizes="(max-width: 768px) 85vw, 500px"
         />
         <div className="absolute inset-0 bg-background/30 transition-opacity duration-500 group-hover:opacity-0" />
 
@@ -130,34 +123,95 @@ function ProjectCard({
   )
 }
 
+/* ---------- slide variants ---------- */
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 300 : -300,
+    opacity: 0,
+    scale: 0.92,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -300 : 300,
+    opacity: 0,
+    scale: 0.92,
+  }),
+}
+
 /* ---------- main component ---------- */
 export function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: "-10%" })
-  const [activeIndex, setActiveIndex] = useState(0)
 
-  const dragX = useMotionValue(0)
-  const CARD_W = 460 // card width + gap
-  const maxDrag = -(projects.length - 1) * CARD_W
+  const [[activeIndex, direction], setPage] = useState([0, 0])
 
-  const containerX = useTransform(dragX, (v) => v)
-
-  function goTo(idx: number) {
-    const clamped = Math.max(0, Math.min(idx, projects.length - 1))
-    setActiveIndex(clamped)
-    animate(dragX, -clamped * CARD_W, { type: "spring", stiffness: 260, damping: 30 })
+  function goTo(newIndex: number) {
+    const clamped = Math.max(0, Math.min(newIndex, projects.length - 1))
+    if (clamped === activeIndex) return
+    setPage([clamped, clamped > activeIndex ? 1 : -1])
   }
 
-  function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
-    const threshold = CARD_W / 4
-    if (info.offset.x < -threshold) {
+  /* Swipe / touch handling */
+  const touchStartX = useRef(0)
+  const touchEndX = useRef(0)
+  const isDragging = useRef(false)
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+    isDragging.current = true
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    touchEndX.current = e.touches[0].clientX
+  }
+
+  function handleTouchEnd() {
+    if (!isDragging.current) return
+    isDragging.current = false
+    const diff = touchStartX.current - touchEndX.current
+    const threshold = 50
+    if (diff > threshold) {
       goTo(activeIndex + 1)
-    } else if (info.offset.x > threshold) {
+    } else if (diff < -threshold) {
       goTo(activeIndex - 1)
-    } else {
-      goTo(activeIndex)
     }
   }
+
+  /* Mouse drag handling */
+  const mouseStartX = useRef(0)
+  const isMouseDragging = useRef(false)
+
+  function handleMouseDown(e: React.MouseEvent) {
+    mouseStartX.current = e.clientX
+    isMouseDragging.current = true
+  }
+
+  function handleMouseUp(e: React.MouseEvent) {
+    if (!isMouseDragging.current) return
+    isMouseDragging.current = false
+    const diff = mouseStartX.current - e.clientX
+    const threshold = 50
+    if (diff > threshold) {
+      goTo(activeIndex + 1)
+    } else if (diff < -threshold) {
+      goTo(activeIndex - 1)
+    }
+  }
+
+  /* Keyboard navigation */
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "ArrowRight") goTo(activeIndex + 1)
+      if (e.key === "ArrowLeft") goTo(activeIndex - 1)
+    }
+    window.addEventListener("keydown", handleKey)
+    return () => window.removeEventListener("keydown", handleKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeIndex])
 
   return (
     <section id="projects" ref={sectionRef} className="py-32 md:py-40">
@@ -170,7 +224,7 @@ export function ProjectsSection() {
           className="mb-16 flex items-center gap-4"
         >
           <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/50">
-            02 / Selected Work
+            03 / Selected Work
           </span>
           <motion.div
             className="h-px flex-1 bg-border"
@@ -201,62 +255,91 @@ export function ProjectsSection() {
             <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
         </motion.div>
-      </div>
 
-      {/* Swipable carousel */}
-      <div className="relative overflow-hidden">
-        <motion.div
-          className="flex cursor-grab items-start gap-5 px-[max(1.5rem,calc((100vw-480px)/2))] active:cursor-grabbing"
-          style={{ x: containerX }}
-          drag="x"
-          dragConstraints={{ left: maxDrag, right: 0 }}
-          dragElastic={0.15}
-          onDragEnd={handleDragEnd}
+        {/* Swipable card area */}
+        <div
+          className="relative mx-auto max-w-[520px] touch-pan-y select-none"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          role="region"
+          aria-label="Project carousel"
+          aria-roledescription="carousel"
         >
-          {projects.map((project, index) => (
-            <ProjectCard
-              key={project.title}
-              project={project}
-              isActive={index === activeIndex}
-            />
-          ))}
-        </motion.div>
-      </div>
+          {/* Card container with fixed height to prevent layout shift */}
+          <div className="relative overflow-hidden" style={{ minHeight: 480 }}>
+            <AnimatePresence initial={false} custom={direction} mode="wait">
+              <motion.div
+                key={activeIndex}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.25 },
+                  scale: { duration: 0.3 },
+                }}
+                className="cursor-grab active:cursor-grabbing"
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`Project ${activeIndex + 1} of ${projects.length}`}
+              >
+                <ProjectCard project={projects[activeIndex]} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-      {/* Controls */}
-      <div className="mx-auto mt-10 flex max-w-6xl items-center justify-between px-6">
-        {/* Dots */}
-        <div className="flex items-center gap-2">
-          {projects.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === activeIndex ? "w-6 bg-foreground" : "w-2 bg-foreground/20"
-              }`}
-              aria-label={`Go to project ${i + 1}`}
-            />
-          ))}
+          {/* Swipe hint for mobile */}
+          <p className="mt-4 text-center font-mono text-[11px] text-muted-foreground/30 md:hidden">
+            swipe to browse
+          </p>
         </div>
 
-        {/* Arrows */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => goTo(activeIndex - 1)}
-            disabled={activeIndex === 0}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground/60 transition-all hover:border-foreground/30 hover:text-foreground disabled:opacity-20 disabled:hover:border-border"
-            aria-label="Previous project"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => goTo(activeIndex + 1)}
-            disabled={activeIndex === projects.length - 1}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground/60 transition-all hover:border-foreground/30 hover:text-foreground disabled:opacity-20 disabled:hover:border-border"
-            aria-label="Next project"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+        {/* Controls */}
+        <div className="mx-auto mt-8 flex max-w-[520px] items-center justify-between">
+          {/* Dots */}
+          <div className="flex items-center gap-2">
+            {projects.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === activeIndex ? "w-6 bg-foreground" : "w-2 bg-foreground/20 hover:bg-foreground/40"
+                }`}
+                aria-label={`Go to project ${i + 1}`}
+                aria-current={i === activeIndex ? "true" : undefined}
+              />
+            ))}
+          </div>
+
+          {/* Counter */}
+          <span className="font-mono text-xs text-muted-foreground/40">
+            {String(activeIndex + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
+          </span>
+
+          {/* Arrows */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => goTo(activeIndex - 1)}
+              disabled={activeIndex === 0}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground/60 transition-all hover:border-foreground/30 hover:text-foreground disabled:opacity-20 disabled:hover:border-border"
+              aria-label="Previous project"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => goTo(activeIndex + 1)}
+              disabled={activeIndex === projects.length - 1}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground/60 transition-all hover:border-foreground/30 hover:text-foreground disabled:opacity-20 disabled:hover:border-border"
+              aria-label="Next project"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </section>

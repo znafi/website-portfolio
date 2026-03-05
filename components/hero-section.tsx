@@ -248,16 +248,48 @@ export function HeroSection() {
               </h1>
             </motion.div>
 
-            {/* Role badges - Founder & SWE emphasized */}
-            <motion.div variants={childVariants} className="mb-6 flex flex-wrap items-center justify-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-foreground/20 bg-foreground/10 px-5 py-2 text-sm font-semibold tracking-wide text-foreground backdrop-blur-sm md:text-base">
-                <span className="h-1.5 w-1.5 rounded-full bg-foreground animate-pulse" />
-                Software Engineer
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-foreground/20 bg-foreground/10 px-5 py-2 text-sm font-semibold tracking-wide text-foreground backdrop-blur-sm md:text-base">
-                <span className="h-1.5 w-1.5 rounded-full bg-foreground animate-pulse" />
-                Agency Founder
-              </span>
+            {/* Flashy role badges */}
+            <motion.div variants={childVariants} className="mb-5 flex flex-wrap items-center justify-center gap-3">
+              <motion.span
+                className="role-badge-swe relative inline-flex items-center gap-2.5 overflow-hidden rounded-full border border-foreground/30 bg-foreground/[0.08] px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-foreground backdrop-blur-md md:text-base"
+                whileHover={{ scale: 1.05, borderColor: "rgba(237,237,237,0.5)" }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground/60" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-foreground" />
+                  </span>
+                  Software Engineer
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-foreground/[0.06] via-foreground/[0.12] to-foreground/[0.06] opacity-0 transition-opacity duration-500 hover:opacity-100" />
+              </motion.span>
+
+              <span className="text-lg font-light text-foreground/20">/</span>
+
+              <motion.span
+                className="role-badge-founder relative inline-flex items-center gap-2.5 overflow-hidden rounded-full border border-foreground/30 bg-foreground/[0.08] px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-foreground backdrop-blur-md md:text-base"
+                whileHover={{ scale: 1.05, borderColor: "rgba(237,237,237,0.5)" }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground/60" style={{ animationDelay: "0.5s" }} />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-foreground" />
+                  </span>
+                  Agency Founder
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-foreground/[0.06] via-foreground/[0.12] to-foreground/[0.06] opacity-0 transition-opacity duration-500 hover:opacity-100" />
+              </motion.span>
+            </motion.div>
+
+            {/* University line */}
+            <motion.div variants={childVariants} className="mb-4">
+              <p className="font-mono text-[13px] tracking-wide text-muted-foreground/60">
+                3rd Year CS{" "}
+                <span className="mx-1.5 text-foreground/15">{"///"}</span>{" "}
+                <span className="text-muted-foreground/80">University of Alberta</span>
+              </p>
             </motion.div>
 
             {/* Rotating text carousel */}

@@ -29,7 +29,7 @@ export function FounderSection() {
           className="mb-16 flex items-center gap-4"
         >
           <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/50">
-            04 / Agency
+            05 / Agency
           </span>
           <motion.div
             className="h-px flex-1 bg-border"

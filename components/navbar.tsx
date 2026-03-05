@@ -5,10 +5,10 @@ import { Terminal } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 const navItems = [
+  { label: "Experience", href: "#experience", id: "experience" },
   { label: "Work", href: "#projects", id: "projects" },
   { label: "Skills", href: "#skills", id: "skills" },
   { label: "Agency", href: "#founder", id: "founder" },
-  { label: "GitHub", href: "#github", id: "github" },
 ]
 
 export function Navbar({ onOpenCommand }: { onOpenCommand: () => void }) {
