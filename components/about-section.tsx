@@ -1,8 +1,30 @@
 "use client"
 
 import { useRef } from "react"
-import { Terminal, Sparkles, Rocket } from "lucide-react"
 import { motion, useInView } from "framer-motion"
+
+/* Custom icons — bold typographic monograms, editorial feel */
+function IconBuild() {
+  return (
+    <span className="font-mono text-[18px] font-bold tracking-tighter text-white">
+      &lt;/&gt;
+    </span>
+  )
+}
+function IconThink() {
+  return (
+    <span className="font-mono text-[18px] font-bold tracking-tight text-white">
+      →
+    </span>
+  )
+}
+function IconBeyond() {
+  return (
+    <span className="font-mono text-[18px] font-extrabold tracking-tighter text-white">
+      ∞
+    </span>
+  )
+}
 
 /* ---------- per-word reveal (CSS-driven) ---------- */
 function WordReveal({ text, className }: { text: string; className?: string }) {
@@ -50,19 +72,19 @@ const details = [
     number: "01",
     label: "What I do",
     text: "Full-stack development across React, Python, TypeScript, and more. From polished UIs to backend services and automation pipelines, the focus is always on shipping something that works.",
-    icon: Terminal,
+    icon: IconBuild,
   },
   {
     number: "02",
     label: "How I think",
     text: "Good software isn't just functional. It's maintainable, scalable, and intentional. I try to understand the system before writing a line, which tends to lead to better decisions down the road.",
-    icon: Sparkles,
+    icon: IconThink,
   },
   {
     number: "03",
     label: "Beyond code",
     text: "While studying full-time, I founded ZStudios, taking it from an idea to a running agency with real clients and delivered projects. It's taught me as much about engineering as any course.",
-    icon: Rocket,
+    icon: IconBeyond,
   },
 ]
 
@@ -118,7 +140,7 @@ export function AboutSection() {
                 {/* Icon + Number row */}
                 <div className="mb-5 flex items-center justify-between">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
-                    <Icon className="h-6 w-6 shrink-0 text-white" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+                    <Icon />
                   </div>
                   <span className="font-mono text-[11px] font-semibold tracking-[0.25em] text-white/40">
                     {item.number}

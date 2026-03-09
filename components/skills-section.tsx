@@ -1,23 +1,6 @@
 "use client"
 
 import React, { useRef, useEffect, useState, useCallback } from "react"
-import {
-  Code2,
-  Database,
-  Server,
-  Box,
-  GitBranch,
-  Flame,
-  Wind,
-  Smartphone,
-  Braces,
-  Search,
-  Workflow,
-  Video,
-  Send,
-  Globe,
-  type LucideIcon,
-} from "lucide-react"
 import { motion, useInView } from "framer-motion"
 
 /* ---------- data ---------- */
@@ -270,51 +253,63 @@ function SphereCloud({ techs }: { techs: string[] }) {
   )
 }
 
-/* ---------- Lucide icon mapping (no external CDN) ---------- */
-const techIconMap: Partial<Record<string, LucideIcon>> = {
-  "HTML": Code2,
-  "CSS": Code2,
-  "TypeScript": Braces,
-  "JavaScript": Braces,
-  "Python": Code2,
-  "SQL": Database,
-  "C++": Braces,
-  "React": Box,
-  "Next.js": Box,
-  "React Native": Smartphone,
-  "Tailwind CSS": Wind,
-  "Node.js": Server,
-  "Express": Server,
-  "Flask": Server,
-  "REST APIs": Server,
-  "GraphQL": Database,
-  "Prisma": Database,
-  "PostgreSQL": Database,
-  "Supabase": Database,
-  "Firebase": Flame,
-  "MongoDB": Database,
-  "SQLite": Database,
-  "Elasticsearch": Search,
-  "Git": GitBranch,
-  "Docker": Box,
-  "GitHub Actions": Workflow,
-  "Playwright": Video,
-  "VS Code": Code2,
-  "Postman": Send,
-  "Drupal": Globe,
+/* ---------- icon data ---------- */
+const D = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons"
+
+const techIcons: Record<string, string> = {
+  "HTML":            `${D}/html5/html5-original.svg`,
+  "CSS":             `${D}/css3/css3-original.svg`,
+  "TypeScript":      `${D}/typescript/typescript-original.svg`,
+  "JavaScript":      `${D}/javascript/javascript-original.svg`,
+  "Python":          `${D}/python/python-original.svg`,
+  "SQL":             `${D}/mysql/mysql-original.svg`,
+  "C++":             `${D}/cplusplus/cplusplus-original.svg`,
+  "React":           `${D}/react/react-original.svg`,
+  "Next.js":         `${D}/nextjs/nextjs-original.svg`,
+  "React Native":    `${D}/react/react-original.svg`,
+  "Tailwind CSS":    `${D}/tailwindcss/tailwindcss-original.svg`,
+  "Node.js":         `${D}/nodejs/nodejs-original.svg`,
+  "Express":         `${D}/express/express-original.svg`,
+  "Flask":           `${D}/flask/flask-original.svg`,
+  "GraphQL":         `${D}/graphql/graphql-plain.svg`,
+  "Prisma":          `${D}/prisma/prisma-original.svg`,
+  "PostgreSQL":      `${D}/postgresql/postgresql-original.svg`,
+  "Supabase":        `${D}/supabase/supabase-original.svg`,
+  "Firebase":        `${D}/firebase/firebase-original.svg`,
+  "MongoDB":         `${D}/mongodb/mongodb-original.svg`,
+  "SQLite":          `${D}/sqlite/sqlite-original.svg`,
+  "Elasticsearch":   `${D}/elasticsearch/elasticsearch-original.svg`,
+  "Git":             `${D}/git/git-original.svg`,
+  "Docker":          `${D}/docker/docker-original.svg`,
+  "GitHub Actions":  `${D}/github/github-original.svg`,
+  "VS Code":         `${D}/vscode/vscode-original.svg`,
+  "Postman":         `${D}/postman/postman-original.svg`,
+  "Playwright":      `${D}/playwright/playwright-original.svg`,
+  "Drupal":          `${D}/drupal/drupal-original.svg`,
 }
 
-function TechIcon({ name }: { name: string }) {
-  const Icon = techIconMap[name]
-  if (Icon) {
+/* ---------- single icon with fallback ---------- */
+function TechImg({ src, alt }: { src: string; alt: string }) {
+  const [err, setErr] = React.useState(false)
+  if (err) {
     return (
-      <Icon size={18} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0" />
+      <span className="flex h-[18px] w-[18px] items-center justify-center rounded font-mono text-[9px] font-bold text-muted-foreground/50">
+        {alt.slice(0, 2).toUpperCase()}
+      </span>
     )
   }
   return (
-    <span className="flex h-[18px] w-[18px] items-center justify-center font-mono text-[9px] font-bold uppercase">
-      {name.slice(0, 2)}
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      width={18}
+      height={18}
+      loading="lazy"
+      decoding="async"
+      className="h-[18px] w-[18px] object-contain"
+      onError={() => setErr(true)}
+    />
   )
 }
 
@@ -329,33 +324,40 @@ function TechIconGrid({ isInView }: { isInView: boolean }) {
     >
       {categories.map((cat, ci) => (
         <div key={cat.name} className="mb-10">
-          <p
-            className="mb-4 font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-white"
-            style={{ textShadow: "0 0 20px rgba(255,255,255,0.4), 0 0 40px rgba(255,255,255,0.15)" }}
-          >
-            {cat.name}
-          </p>
+<p
+              className="mb-4 font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-white"
+              style={{ textShadow: "0 0 12px rgba(255,255,255,0.5), 0 0 28px rgba(255,255,255,0.25)" }}
+            >
+              {cat.name}
+            </p>
           <div className="flex flex-wrap gap-3">
-            {cat.items.map((item, ii) => (
-              <motion.div
-                key={item}
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                transition={{
-                  duration: 0.4,
-                  delay: 0.65 + ci * 0.05 + ii * 0.03,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                className="group flex items-center gap-2.5 rounded-xl border border-white/20 bg-black/90 px-3.5 py-2.5 transition-all hover:border-white/35 hover:shadow-[0_0_20px_rgba(255,255,255,0.08)]"
-              >
-                <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-white">
-                  <TechIcon name={item} />
-                </span>
-                <span className="font-mono text-[12px] text-white/80 transition-colors group-hover:text-white">
-                  {item}
-                </span>
-              </motion.div>
-            ))}
+            {cat.items.map((item, ii) => {
+              const icon = techIcons[item]
+              return (
+                <motion.div
+                  key={item}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                  transition={{
+                    duration: 0.4,
+                    delay: 0.65 + ci * 0.05 + ii * 0.03,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="group flex items-center gap-2.5 rounded-xl border border-border bg-card px-3.5 py-2.5 transition-all hover:border-foreground/20 hover:bg-secondary/60"
+                >
+                  {icon ? (
+                    <TechImg src={icon} alt={item} />
+                  ) : (
+                    <span className="flex h-[18px] w-[18px] items-center justify-center rounded font-mono text-[9px] font-bold text-muted-foreground/50">
+                      {item.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="font-mono text-[12px] text-muted-foreground/60 transition-colors group-hover:text-foreground/80">
+                    {item}
+                  </span>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       ))}
