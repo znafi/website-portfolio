@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef } from "react"
-import { Code2, Lightbulb, Rocket } from "lucide-react"
+import { Terminal, Sparkles, Rocket } from "lucide-react"
 import { motion, useInView } from "framer-motion"
 
 /* ---------- per-word reveal (CSS-driven) ---------- */
@@ -50,13 +50,13 @@ const details = [
     number: "01",
     label: "What I do",
     text: "Full-stack development across React, Python, TypeScript, and more. From polished UIs to backend services and automation pipelines, the focus is always on shipping something that works.",
-    icon: Code2,
+    icon: Terminal,
   },
   {
     number: "02",
     label: "How I think",
     text: "Good software isn't just functional. It's maintainable, scalable, and intentional. I try to understand the system before writing a line, which tends to lead to better decisions down the road.",
-    icon: Lightbulb,
+    icon: Sparkles,
   },
   {
     number: "03",
@@ -117,8 +117,8 @@ export function AboutSection() {
               >
                 {/* Icon + Number row */}
                 <div className="mb-5 flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/5">
-                    <Icon className="h-5 w-5 text-white" strokeWidth={2.5} />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
+                    <Icon className="h-6 w-6 shrink-0 text-white" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
                   </div>
                   <span className="font-mono text-[11px] font-semibold tracking-[0.25em] text-white/40">
                     {item.number}
