@@ -51,21 +51,18 @@ const details = [
     label: "What I do",
     text: "Full-stack development across React, Python, TypeScript, and more. From polished UIs to backend services and automation pipelines, the focus is always on shipping something that works.",
     icon: Code2,
-    iconBg: "#4f46e5",
   },
   {
     number: "02",
     label: "How I think",
     text: "Good software isn't just functional. It's maintainable, scalable, and intentional. I try to understand the system before writing a line, which tends to lead to better decisions down the road.",
     icon: Lightbulb,
-    iconBg: "#eab308",
   },
   {
     number: "03",
     label: "Beyond code",
     text: "While studying full-time, I founded ZStudios, taking it from an idea to a running agency with real clients and delivered projects. It's taught me as much about engineering as any course.",
     icon: Rocket,
-    iconBg: "#10b981",
   },
 ]
 
@@ -114,27 +111,27 @@ export function AboutSection() {
                 variants={cardVariants}
                 initial="hidden"
                 animate={isInView ? "visible" : "hidden"}
-                className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-[0_2px_20px_rgba(0,0,0,0.12)] transition-all duration-300 hover:shadow-[0_8px_40px_rgba(0,0,0,0.18)] md:p-7"
-                whileHover={{ y: -5 }}
+                className="group relative overflow-hidden rounded-2xl border border-white/20 bg-black/90 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_0_30px_-5px_rgba(255,255,255,0.1)] transition-all duration-300 hover:border-white/35 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_0_40px_-5px_rgba(255,255,255,0.15),0_0_80px_-15px_rgba(255,255,255,0.08)] md:p-7"
+                whileHover={{ y: -4 }}
                 transition={{ type: "spring", stiffness: 300, damping: 22 }}
               >
                 {/* Icon + Number row */}
                 <div className="mb-5 flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: item.iconBg }}>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/5">
                     <Icon className="h-5 w-5 text-white" strokeWidth={2.5} />
                   </div>
-                  <span className="font-mono text-[11px] font-semibold tracking-[0.25em] text-neutral-300">
+                  <span className="font-mono text-[11px] font-semibold tracking-[0.25em] text-white/40">
                     {item.number}
                   </span>
                 </div>
 
                 {/* Label */}
-                <h3 className="mb-3 text-2xl font-extrabold tracking-tight text-neutral-900 md:text-3xl">
+                <h3 className="mb-3 text-2xl font-extrabold tracking-tight text-white md:text-3xl">
                   {item.label}
                 </h3>
 
                 {/* Body */}
-                <p className="text-[14px] font-semibold leading-relaxed text-neutral-800">
+                <p className="text-[14px] font-medium leading-relaxed text-white/70">
                   {item.text}
                 </p>
               </motion.div>
