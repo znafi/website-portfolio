@@ -73,7 +73,7 @@ function ContactForm({ isInView }: { isInView: boolean }) {
     setError(false)
     
     try {
-      const res = await fetch("https://formspree.io/f/mojkw0re", {
+      const res = await fetch("https://formspree.io/f/mojkwore", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -127,6 +127,8 @@ function ContactForm({ isInView }: { isInView: boolean }) {
         ) : (
           <motion.form
             key="form"
+            action="https://formspree.io/f/mojkwore"
+            method="POST"
             onSubmit={handleSubmit}
             className="flex flex-col gap-3"
           >
