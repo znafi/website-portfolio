@@ -84,118 +84,123 @@ export function AboutSection() {
           />
         </motion.div>
 
-        {/* ——— THE MANIFESTO ——— */}
+        {/* ——— ABOUT CONTENT ——— */}
         <div className="space-y-3">
-          {/* Opening hit */}
+          {/* Opening */}
           <RevealLine>
             <h2 className="text-[clamp(3rem,8vw,7rem)] font-extrabold leading-[0.9] tracking-tighter text-foreground">
-              I build things.
+              Third-year CS student.
             </h2>
           </RevealLine>
 
           <RevealLine delay={0.12}>
-            <p className="max-w-md text-lg leading-relaxed text-foreground/35 md:text-xl">
-              Not to practice. Not for grades.
-            </p>
-          </RevealLine>
-
-          <RevealLine delay={0.2}>
             <h2 className="text-[clamp(3rem,8vw,7rem)] font-extrabold leading-[0.9] tracking-tighter">
               <span className="bg-gradient-to-r from-foreground via-foreground/70 to-foreground/30 bg-clip-text text-transparent">
-                To ship.
+                Full-stack developer.
               </span>
             </h2>
           </RevealLine>
 
-          <Note delay={0.25}>10+ projects deployed to production</Note>
+          <Note delay={0.2}>University of Alberta</Note>
 
-          {/* Origin story */}
+          {/* What I do */}
           <div className="space-y-1 pt-6">
             <RevealLine>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                Started coding three years ago.
+                I build web applications end-to-end.
               </p>
             </RevealLine>
             <RevealLine delay={0.06}>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                Started an agency one year in.
+                React frontends, Python backends,
               </p>
             </RevealLine>
             <RevealLine delay={0.12}>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                <span className="font-semibold text-foreground/85">ZStudios</span>
-                {" "}— real clients, real deadlines,
+                deployed to production.
               </p>
             </RevealLine>
-            <RevealLine delay={0.18}>
+          </div>
+
+          <Note>React · Python · TypeScript · Flask · Next.js</Note>
+
+          {/* Experience */}
+          <div className="space-y-1 pt-6">
+            <RevealLine>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                Founded <span className="font-semibold text-foreground/85">ZStudios</span> in 2024.
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.06}>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                Delivered projects for 5+ clients.
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.12}>
               <p className="text-[clamp(1.75rem,4.5vw,3rem)] font-bold tracking-tight text-foreground/90">
-                real stakes.
+                Balanced agency work with full-time studies.
               </p>
             </RevealLine>
           </div>
 
-          <Note>University of Alberta · 3rd year CS</Note>
-
-          {/* Philosophy */}
+          {/* Projects */}
           <div className="space-y-1 pt-6">
             <RevealLine>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                I think in systems,
+                Built an automated event registration system
               </p>
             </RevealLine>
             <RevealLine delay={0.06}>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                build in sprints,
+                that handled 30+ sign-ups with zero failures.
               </p>
-            </RevealLine>
-            <RevealLine delay={0.12}>
-              <h3 className="text-[clamp(1.75rem,5vw,3.5rem)] font-bold tracking-tight text-foreground">
-                and ship in weeks.
-              </h3>
             </RevealLine>
           </div>
 
-          {/* Tech — not badges, just quiet confident text */}
-          <RevealLine direction="left">
-            <div className="flex flex-wrap gap-x-8 gap-y-3 py-10">
-              {["React", "Python", "TypeScript", "Blockchain", "Automation", "Full-stack"].map(
-                (tech) => (
-                  <span
-                    key={tech}
-                    className="font-mono text-[13px] tracking-widest text-foreground/20 transition-colors duration-300 hover:text-foreground/60 md:text-sm"
-                  >
-                    {tech}
-                  </span>
-                )
-              )}
-            </div>
-          </RevealLine>
-
-          {/* Closing */}
-          <div className="pt-4">
+          <div className="space-y-1 pt-4">
             <RevealLine>
-              <p className="max-w-lg text-lg italic text-foreground/25 md:text-xl">
-                The code is the easy part.
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                Deployed a blockchain marketplace on ICP mainnet
               </p>
             </RevealLine>
-            <RevealLine delay={0.1}>
-              <h3 className="mt-2 max-w-3xl text-[clamp(1.75rem,4.5vw,3rem)] font-bold leading-[1.1] tracking-tight text-foreground">
-                Understanding the problem —
-                <br />
-                that&apos;s where the real work happens.
+            <RevealLine delay={0.06}>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                with smart contracts handling escrow.
+              </p>
+            </RevealLine>
+          </div>
+
+          <div className="space-y-1 pt-4">
+            <RevealLine>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                Created a legal document search engine
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.06}>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                indexing 10,000+ documents with sub-200ms queries.
+              </p>
+            </RevealLine>
+          </div>
+
+          {/* Approach */}
+          <div className="pt-8">
+            <RevealLine>
+              <h3 className="max-w-3xl text-[clamp(1.75rem,4.5vw,3rem)] font-bold leading-[1.1] tracking-tight text-foreground">
+                I focus on solving problems, not just writing code.
               </h3>
             </RevealLine>
           </div>
 
-          {/* Currently — live indicator */}
-          <RevealLine delay={0.15}>
+          {/* Currently */}
+          <RevealLine delay={0.1}>
             <div className="flex items-center gap-3 pt-12">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
               </span>
               <span className="font-mono text-[12px] tracking-wide text-foreground/30">
-                Currently building with Next.js &amp; shipping ZStudios projects
+                Open to internship opportunities for Summer 2026
               </span>
             </div>
           </RevealLine>
