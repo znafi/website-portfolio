@@ -65,26 +65,21 @@ function ContactForm({ isInView }: { isInView: boolean }) {
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!name || !email || !message) return
-    setSending(true)
-    try {
-      const res = await fetch("https://formspree.io/f/znafi@ualberta.ca", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ name, email, message }),
-      })
-      if (res.ok) {
-        setSent(true)
-      } else {
-        window.location.href = `mailto:znafi@ualberta.ca?subject=Message from ${encodeURIComponent(name)}&body=${encodeURIComponent(message)}%0A%0A- ${encodeURIComponent(name)} (${encodeURIComponent(email)})`
-      }
-    } catch {
-      window.location.href = `mailto:znafi@ualberta.ca?subject=Message from ${encodeURIComponent(name)}&body=${encodeURIComponent(message)}%0A%0A- ${encodeURIComponent(name)} (${encodeURIComponent(email)})`
-    } finally {
-      setSending(false)
-    }
+    
+    const subject = `Portfolio Contact: Message from ${name}`
+    const body = `${message}%0A%0A----%0AFrom: ${name}%0AEmail: ${email}`
+    
+    window.location.href = `mailto:znafi@ualberta.ca?subject=${encodeURIComponent(subject)}&body=${body}`
+    
+    setSent(true)
+    setTimeout(() => {
+      setName("")
+      setEmail("")
+      setMessage("")
+    }, 2000)
   }
 
   return (
