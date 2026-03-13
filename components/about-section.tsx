@@ -16,7 +16,7 @@ function RevealLine({
   direction?: "up" | "left" | "right"
 }) {
   const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-8%" })
+  const isInView = useInView(ref, { margin: "-8%" })
 
   const offsets = {
     up: { y: 50, x: 0 },
@@ -40,7 +40,7 @@ function RevealLine({
 /* ---------- inline annotation ---------- */
 function Note({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-5%" })
+  const isInView = useInView(ref, { margin: "-5%" })
 
   return (
     <motion.div
@@ -60,7 +60,7 @@ function Note({ children, delay = 0 }: { children: React.ReactNode; delay?: numb
 
 export function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null)
-  const isInView = useInView(sectionRef, { once: true, margin: "-10%" })
+  const isInView = useInView(sectionRef, { margin: "-10%" })
 
   return (
     <section id="about" ref={sectionRef} className="px-6 py-32 md:py-44">
@@ -96,63 +96,42 @@ export function AboutSection() {
           <RevealLine delay={0.12}>
             <h2 className="text-[clamp(3rem,8vw,7rem)] font-extrabold leading-[0.9] tracking-tighter">
               <span className="bg-gradient-to-r from-foreground via-foreground/70 to-foreground/30 bg-clip-text text-transparent">
-                Full-stack developer.
+                Founder of ZStudios.
               </span>
             </h2>
           </RevealLine>
 
           <Note delay={0.2}>University of Alberta</Note>
 
-          {/* What I do */}
+          {/* What ZStudios is */}
           <div className="space-y-1 pt-6">
             <RevealLine>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                I build web applications end-to-end.
+                ZStudios is a digital agency where I work with businesses
               </p>
             </RevealLine>
             <RevealLine delay={0.06}>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                React frontends, Python backends,
+                to design and launch web products, AI automations,
               </p>
             </RevealLine>
             <RevealLine delay={0.12}>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                deployed to production.
+                SEO, and social media marketing.
               </p>
             </RevealLine>
           </div>
 
-          <Note>React · Python · TypeScript · Flask · Next.js</Note>
-
-          {/* Experience */}
+          {/* Leadership journey */}
           <div className="space-y-1 pt-6">
             <RevealLine>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                Founded <span className="font-semibold text-foreground/85">ZStudios</span> in 2024.
+                Starting the agency while studying
               </p>
             </RevealLine>
             <RevealLine delay={0.06}>
-              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                Delivered projects for 5+ clients.
-              </p>
-            </RevealLine>
-            <RevealLine delay={0.12}>
               <p className="text-[clamp(1.75rem,4.5vw,3rem)] font-bold tracking-tight text-foreground/90">
-                Balanced agency work with full-time studies.
-              </p>
-            </RevealLine>
-          </div>
-
-          {/* Projects */}
-          <div className="space-y-1 pt-6">
-            <RevealLine>
-              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                Built an automated event registration system
-              </p>
-            </RevealLine>
-            <RevealLine delay={0.06}>
-              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                that handled 30+ sign-ups with zero failures.
+                pushed me into a leadership role early.
               </p>
             </RevealLine>
           </div>
@@ -160,35 +139,56 @@ export function AboutSection() {
           <div className="space-y-1 pt-4">
             <RevealLine>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                Deployed a blockchain marketplace on ICP mainnet
+                Managing projects end-to-end,
               </p>
             </RevealLine>
             <RevealLine delay={0.06}>
               <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                with smart contracts handling escrow.
+                working with clients,
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.12}>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                turning ideas into working products.
               </p>
             </RevealLine>
           </div>
 
-          <div className="space-y-1 pt-4">
-            <RevealLine>
-              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                Created a legal document search engine
-              </p>
-            </RevealLine>
-            <RevealLine delay={0.06}>
-              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
-                indexing 10,000+ documents with sub-200ms queries.
-              </p>
-            </RevealLine>
-          </div>
-
-          {/* Approach */}
+          {/* What drives you */}
           <div className="pt-8">
             <RevealLine>
               <h3 className="max-w-3xl text-[clamp(1.75rem,4.5vw,3rem)] font-bold leading-[1.1] tracking-tight text-foreground">
-                I focus on solving problems, not just writing code.
+                Building things that go from idea → product → people using it
               </h3>
+            </RevealLine>
+            <RevealLine delay={0.1}>
+              <p className="mt-4 max-w-2xl text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                is what excites me most.
+              </p>
+            </RevealLine>
+          </div>
+
+          {/* What you learned */}
+          <div className="space-y-1 pt-6">
+            <RevealLine>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                Running ZStudios alongside university taught me
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.06}>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                how to operate under real deadlines,
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.12}>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                solve practical problems,
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.18}>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                and deliver work that businesses rely on.
+              </p>
             </RevealLine>
           </div>
 
@@ -200,7 +200,7 @@ export function AboutSection() {
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
               </span>
               <span className="font-mono text-[12px] tracking-wide text-foreground/30">
-                Open to internship opportunities for Summer 2026
+                Looking for opportunities to contribute to meaningful products and collaborate with strong teams
               </span>
             </div>
           </RevealLine>
