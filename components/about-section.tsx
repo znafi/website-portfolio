@@ -1,32 +1,100 @@
 "use client"
 
-import { useRef } from "react"
-import { motion, useInView } from "framer-motion"
+import { useRef, useState, useEffect, useCallback } from "react"
+import { motion, useInView, useMotionValue, useSpring } from "framer-motion"
 
-/* Custom icons — bold typographic monograms, editorial feel */
-function IconBuild() {
+/* ---------- animated counter ---------- */
+function AnimatedCounter({
+  target,
+  suffix = "",
+  duration = 2000,
+  isInView,
+}: {
+  target: number
+  suffix?: string
+  duration?: number
+  isInView: boolean
+}) {
+  const [count, setCount] = useState(0)
+  const hasAnimated = useRef(false)
+
+  useEffect(() => {
+    if (!isInView || hasAnimated.current) return
+    hasAnimated.current = true
+    const start = performance.now()
+    const step = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1)
+      const ease = 1 - Math.pow(1 - progress, 4)
+      setCount(Math.floor(ease * target))
+      if (progress < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+  }, [isInView, target, duration])
+
   return (
-    <span className="font-mono text-[18px] font-bold tracking-tighter text-white">
-      &lt;/&gt;
-    </span>
-  )
-}
-function IconThink() {
-  return (
-    <span className="font-mono text-[18px] font-bold tracking-tight text-white">
-      →
-    </span>
-  )
-}
-function IconBeyond() {
-  return (
-    <span className="font-mono text-[18px] font-extrabold tracking-tighter text-white">
-      ∞
+    <span>
+      {count}
+      {suffix}
     </span>
   )
 }
 
-/* ---------- per-word reveal (CSS-driven) ---------- */
+/* ---------- spotlight card with mouse tracking ---------- */
+function SpotlightCard({
+  children,
+  className = "",
+  spotlightColor = "rgba(255,255,255,0.06)",
+}: {
+  children: React.ReactNode
+  className?: string
+  spotlightColor?: string
+}) {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const mouseX = useMotionValue(-300)
+  const mouseY = useMotionValue(-300)
+  const springX = useSpring(mouseX, { stiffness: 300, damping: 30 })
+  const springY = useSpring(mouseY, { stiffness: 300, damping: 30 })
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const rect = cardRef.current?.getBoundingClientRect()
+      if (!rect) return
+      mouseX.set(e.clientX - rect.left)
+      mouseY.set(e.clientY - rect.top)
+    },
+    [mouseX, mouseY]
+  )
+
+  const handleMouseLeave = useCallback(() => {
+    mouseX.set(-300)
+    mouseY.set(-300)
+  }, [mouseX, mouseY])
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={`group relative overflow-hidden ${className}`}
+    >
+      <motion.div
+        className="pointer-events-none absolute -inset-px z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          x: springX,
+          y: springY,
+          width: 600,
+          height: 600,
+          marginLeft: -300,
+          marginTop: -300,
+          background: `radial-gradient(circle, ${spotlightColor}, transparent 40%)`,
+        }}
+      />
+      <div className="relative z-10">{children}</div>
+    </div>
+  )
+}
+
+/* ---------- per-word reveal ---------- */
 function WordReveal({ text, className }: { text: string; className?: string }) {
   const ref = useRef<HTMLParagraphElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-10%" })
@@ -53,40 +121,68 @@ function WordReveal({ text, className }: { text: string; className?: string }) {
   )
 }
 
-/* ---------- about card ---------- */
+/* ---------- stats data ---------- */
+const stats = [
+  { value: 3, suffix: "+", label: "Years coding" },
+  { value: 10, suffix: "+", label: "Projects shipped" },
+  { value: 5, suffix: "+", label: "Clients served" },
+  { value: 1000, suffix: "+", label: "Commits this year" },
+]
+
+/* ---------- bento card data ---------- */
+const bentoCards = [
+  {
+    id: "build",
+    icon: "</>" ,
+    label: "What I build",
+    text: "Full-stack products across React, Python, TypeScript, and more. From polished UIs to backend services and automation pipelines — always shipping something that works.",
+    gradient: "from-violet-500/20 via-transparent to-transparent",
+    spotlightColor: "rgba(139,92,246,0.1)",
+    span: "md:col-span-2",
+  },
+  {
+    id: "think",
+    icon: "{ }",
+    label: "How I think",
+    text: "Understand the system before writing a line. Maintainable, scalable, intentional — good decisions compound over time.",
+    gradient: "from-cyan-500/20 via-transparent to-transparent",
+    spotlightColor: "rgba(6,182,212,0.1)",
+    span: "md:col-span-1",
+  },
+  {
+    id: "beyond",
+    icon: "//",
+    label: "Beyond code",
+    text: "Founded ZStudios while studying full-time — from zero to a running agency with real clients and delivered projects.",
+    gradient: "from-amber-500/20 via-transparent to-transparent",
+    spotlightColor: "rgba(245,158,11,0.1)",
+    span: "md:col-span-1",
+  },
+  {
+    id: "stack",
+    icon: "**",
+    label: "My edge",
+    text: "I don't just write code — I build products. Engineering meets design thinking meets business sense. That's what happens when you run an agency and ship your own projects at the same time.",
+    gradient: "from-rose-500/20 via-transparent to-transparent",
+    spotlightColor: "rgba(244,63,94,0.1)",
+    span: "md:col-span-2",
+  },
+]
+
+/* ---------- card variants ---------- */
 const cardVariants = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0, y: 40, scale: 0.97 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
+    scale: 1,
     transition: {
-      duration: 0.7,
-      delay: 0.3 + i * 0.15,
+      duration: 0.8,
+      delay: 0.3 + i * 0.12,
       ease: [0.16, 1, 0.3, 1],
     },
   }),
 }
-
-const details = [
-  {
-    number: "01",
-    label: "What I do",
-    text: "Full-stack development across React, Python, TypeScript, and more. From polished UIs to backend services and automation pipelines, the focus is always on shipping something that works.",
-    icon: IconBuild,
-  },
-  {
-    number: "02",
-    label: "How I think",
-    text: "Good software isn't just functional. It's maintainable, scalable, and intentional. I try to understand the system before writing a line, which tends to lead to better decisions down the road.",
-    icon: IconThink,
-  },
-  {
-    number: "03",
-    label: "Beyond code",
-    text: "While studying full-time, I founded ZStudios, taking it from an idea to a running agency with real clients and delivered projects. It's taught me as much about engineering as any course.",
-    icon: IconBeyond,
-  },
-]
 
 export function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -122,43 +218,88 @@ export function AboutSection() {
           />
         </div>
 
-        {/* Details grid */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-5">
-          {details.map((item, i) => {
-            const Icon = item.icon
-            return (
-              <motion.div
-                key={item.label}
-                custom={i}
-                variants={cardVariants}
-                initial="hidden"
-                animate={isInView ? "visible" : "hidden"}
-                className="group relative overflow-hidden rounded-2xl border border-white/20 bg-black/90 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_0_30px_-5px_rgba(255,255,255,0.1)] transition-all duration-300 hover:border-white/35 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.15),0_0_40px_-5px_rgba(255,255,255,0.15),0_0_80px_-15px_rgba(255,255,255,0.08)] md:p-7"
-                whileHover={{ y: -4 }}
-                transition={{ type: "spring", stiffness: 300, damping: 22 }}
+        {/* Animated stats bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-16 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-0"
+        >
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{
+                duration: 0.6,
+                delay: 0.4 + i * 0.1,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className={`group flex flex-col items-center py-6 transition-colors ${
+                i < stats.length - 1
+                  ? "md:border-r md:border-white/10"
+                  : ""
+              }`}
+            >
+              <span className="mb-1 font-mono text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+                <AnimatedCounter
+                  target={stat.value}
+                  suffix={stat.suffix}
+                  isInView={isInView}
+                />
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground/50 transition-colors group-hover:text-muted-foreground/80">
+                {stat.label}
+              </span>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Bento grid */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {bentoCards.map((card, i) => (
+            <motion.div
+              key={card.id}
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              animate={isInView ? "visible" : "hidden"}
+              className={card.span}
+            >
+              <SpotlightCard
+                spotlightColor={card.spotlightColor}
+                className="h-full rounded-3xl border border-white/[0.08] bg-white/[0.02] p-7 backdrop-blur-sm transition-all duration-500 hover:border-white/20 hover:bg-white/[0.04] md:p-8"
               >
-                {/* Icon + Number row */}
-                <div className="mb-5 flex items-center justify-between">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
-                    <Icon />
+                {/* Gradient accent */}
+                <div
+                  className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${card.gradient} opacity-0 transition-opacity duration-700 group-hover:opacity-100`}
+                />
+
+                {/* Icon */}
+                <div className="relative mb-6 flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] transition-all duration-300 group-hover:border-white/20 group-hover:bg-white/[0.08]">
+                    <span className="font-mono text-lg font-bold text-white/80 transition-colors group-hover:text-white">
+                      {card.icon}
+                    </span>
                   </div>
-                  <span className="font-mono text-[11px] font-semibold tracking-[0.25em] text-white/40">
-                    {item.number}
-                  </span>
+                  <h3 className="text-xl font-bold tracking-tight text-white md:text-2xl">
+                    {card.label}
+                  </h3>
                 </div>
 
-                {/* Label */}
-                <h3 className="mb-3 text-2xl font-extrabold tracking-tight text-white md:text-3xl">
-                  {item.label}
-                </h3>
-
                 {/* Body */}
-                <p className="text-[14px] font-medium leading-relaxed text-white/70">
-                  {item.text}
+                <p className="relative text-[14px] leading-[1.8] text-white/50 transition-colors duration-300 group-hover:text-white/70 md:text-[15px]">
+                  {card.text}
                 </p>
-              </motion.div>
-            )
-          })}
+
+                {/* Decorative corner line */}
+                <div className="absolute bottom-0 right-0 h-20 w-20 overflow-hidden rounded-br-3xl">
+                  <div className="absolute bottom-3 right-3 h-px w-8 bg-gradient-to-l from-white/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                  <div className="absolute bottom-3 right-3 h-8 w-px bg-gradient-to-t from-white/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                </div>
+              </SpotlightCard>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
