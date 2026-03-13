@@ -16,7 +16,7 @@ function RevealLine({
   direction?: "up" | "left" | "right"
 }) {
   const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { margin: "-8%" })
+  const isInView = useInView(ref, { once: true, margin: "-15%" })
 
   const offsets = {
     up: { y: 50, x: 0 },
@@ -40,7 +40,7 @@ function RevealLine({
 /* ---------- inline annotation ---------- */
 function Note({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { margin: "-5%" })
+  const isInView = useInView(ref, { once: true, margin: "-15%" })
 
   return (
     <motion.div
@@ -60,7 +60,7 @@ function Note({ children, delay = 0 }: { children: React.ReactNode; delay?: numb
 
 export function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null)
-  const isInView = useInView(sectionRef, { margin: "-10%" })
+  const isInView = useInView(sectionRef, { once: true, margin: "-15%" })
 
   return (
     <section id="about" ref={sectionRef} className="px-6 py-32 md:py-44">
