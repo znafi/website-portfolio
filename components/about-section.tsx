@@ -1,202 +1,76 @@
 "use client"
 
-import { useRef, useState, useEffect, useCallback } from "react"
-import { motion, useInView, useMotionValue, useSpring } from "framer-motion"
+import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
 
-/* ---------- animated counter ---------- */
-function AnimatedCounter({
-  target,
-  suffix = "",
-  duration = 2000,
-  isInView,
-}: {
-  target: number
-  suffix?: string
-  duration?: number
-  isInView: boolean
-}) {
-  const [count, setCount] = useState(0)
-  const hasAnimated = useRef(false)
-
-  useEffect(() => {
-    if (!isInView || hasAnimated.current) return
-    hasAnimated.current = true
-    const start = performance.now()
-    const step = (now: number) => {
-      const progress = Math.min((now - start) / duration, 1)
-      const ease = 1 - Math.pow(1 - progress, 4)
-      setCount(Math.floor(ease * target))
-      if (progress < 1) requestAnimationFrame(step)
-    }
-    requestAnimationFrame(step)
-  }, [isInView, target, duration])
-
-  return (
-    <span>
-      {count}
-      {suffix}
-    </span>
-  )
-}
-
-/* ---------- spotlight card with mouse tracking ---------- */
-function SpotlightCard({
+/* ---------- scroll-triggered line reveal ---------- */
+function RevealLine({
   children,
   className = "",
-  spotlightColor = "rgba(255,255,255,0.06)",
+  delay = 0,
+  direction = "up",
 }: {
   children: React.ReactNode
   className?: string
-  spotlightColor?: string
+  delay?: number
+  direction?: "up" | "left" | "right"
 }) {
-  const cardRef = useRef<HTMLDivElement>(null)
-  const mouseX = useMotionValue(-300)
-  const mouseY = useMotionValue(-300)
-  const springX = useSpring(mouseX, { stiffness: 300, damping: 30 })
-  const springY = useSpring(mouseY, { stiffness: 300, damping: 30 })
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: "-8%" })
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      const rect = cardRef.current?.getBoundingClientRect()
-      if (!rect) return
-      mouseX.set(e.clientX - rect.left)
-      mouseY.set(e.clientY - rect.top)
-    },
-    [mouseX, mouseY]
-  )
-
-  const handleMouseLeave = useCallback(() => {
-    mouseX.set(-300)
-    mouseY.set(-300)
-  }, [mouseX, mouseY])
+  const offsets = {
+    up: { y: 50, x: 0 },
+    left: { y: 0, x: -50 },
+    right: { y: 0, x: 50 },
+  }
 
   return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className={`group relative overflow-hidden ${className}`}
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, ...offsets[direction] }}
+      animate={isInView ? { opacity: 1, y: 0, x: 0 } : {}}
+      transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
+      className={className}
     >
-      <motion.div
-        className="pointer-events-none absolute -inset-px z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{
-          x: springX,
-          y: springY,
-          width: 600,
-          height: 600,
-          marginLeft: -300,
-          marginTop: -300,
-          background: `radial-gradient(circle, ${spotlightColor}, transparent 40%)`,
-        }}
-      />
-      <div className="relative z-10">{children}</div>
-    </div>
+      {children}
+    </motion.div>
   )
 }
 
-/* ---------- per-word reveal ---------- */
-function WordReveal({ text, className }: { text: string; className?: string }) {
-  const ref = useRef<HTMLParagraphElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-10%" })
-  const words = text.split(" ")
+/* ---------- inline annotation ---------- */
+function Note({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: "-5%" })
 
   return (
-    <p ref={ref} className={className}>
-      {words.map((word, i) => (
-        <span key={i} className="inline-block overflow-hidden">
-          <span
-            className="inline-block transition-all duration-500"
-            style={{
-              transitionDelay: `${i * 30}ms`,
-              transform: isInView ? "translateY(0)" : "translateY(100%)",
-              opacity: isInView ? 1 : 0,
-            }}
-          >
-            {word}
-            {i < words.length - 1 ? "\u00A0" : ""}
-          </span>
-        </span>
-      ))}
-    </p>
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, x: -20 }}
+      animate={isInView ? { opacity: 1, x: 0 } : {}}
+      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="my-8 flex items-center gap-4"
+    >
+      <div className="h-px w-10 bg-foreground/15" />
+      <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-foreground/25">
+        {children}
+      </span>
+    </motion.div>
   )
-}
-
-/* ---------- stats data ---------- */
-const stats = [
-  { value: 3, suffix: "+", label: "Years coding" },
-  { value: 10, suffix: "+", label: "Projects shipped" },
-  { value: 5, suffix: "+", label: "Clients served" },
-  { value: 1000, suffix: "+", label: "Commits this year" },
-]
-
-/* ---------- bento card data ---------- */
-const bentoCards = [
-  {
-    id: "build",
-    icon: "</>" ,
-    label: "What I build",
-    text: "Full-stack products across React, Python, TypeScript, and more. From polished UIs to backend services and automation pipelines — always shipping something that works.",
-    gradient: "from-violet-500/20 via-transparent to-transparent",
-    spotlightColor: "rgba(139,92,246,0.1)",
-    span: "md:col-span-2",
-  },
-  {
-    id: "think",
-    icon: "{ }",
-    label: "How I think",
-    text: "Understand the system before writing a line. Maintainable, scalable, intentional — good decisions compound over time.",
-    gradient: "from-cyan-500/20 via-transparent to-transparent",
-    spotlightColor: "rgba(6,182,212,0.1)",
-    span: "md:col-span-1",
-  },
-  {
-    id: "beyond",
-    icon: "//",
-    label: "Beyond code",
-    text: "Founded ZStudios while studying full-time — from zero to a running agency with real clients and delivered projects.",
-    gradient: "from-amber-500/20 via-transparent to-transparent",
-    spotlightColor: "rgba(245,158,11,0.1)",
-    span: "md:col-span-1",
-  },
-  {
-    id: "stack",
-    icon: "**",
-    label: "My edge",
-    text: "I don't just write code — I build products. Engineering meets design thinking meets business sense. That's what happens when you run an agency and ship your own projects at the same time.",
-    gradient: "from-rose-500/20 via-transparent to-transparent",
-    spotlightColor: "rgba(244,63,94,0.1)",
-    span: "md:col-span-2",
-  },
-]
-
-/* ---------- card variants ---------- */
-const cardVariants = {
-  hidden: { opacity: 0, y: 40, scale: 0.97 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.8,
-      delay: 0.3 + i * 0.12,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  }),
 }
 
 export function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null)
-  const isInView = useInView(sectionRef, { once: true, margin: "-15%" })
+  const isInView = useInView(sectionRef, { once: true, margin: "-10%" })
 
   return (
-    <section id="about" ref={sectionRef} className="px-6 py-32 md:py-40">
-      <div className="mx-auto max-w-6xl">
+    <section id="about" ref={sectionRef} className="px-6 py-32 md:py-44">
+      <div className="mx-auto max-w-5xl">
         {/* Section label */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-16 flex items-center gap-4"
+          className="mb-20 flex items-center gap-4"
         >
           <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/50">
             01 / About
@@ -210,96 +84,121 @@ export function AboutSection() {
           />
         </motion.div>
 
-        {/* Big statement with word-by-word reveal */}
-        <div className="mb-20">
-          <WordReveal
-            text="Third-year CS student at the University of Alberta, with a running agency, shipped products, and real client work. Building in parallel with studying, not after."
-            className="max-w-4xl text-[clamp(1.5rem,3.5vw,2.75rem)] font-medium leading-[1.2] tracking-tight text-foreground/90"
-          />
-        </div>
+        {/* ——— THE MANIFESTO ——— */}
+        <div className="space-y-3">
+          {/* Opening hit */}
+          <RevealLine>
+            <h2 className="text-[clamp(3rem,8vw,7rem)] font-extrabold leading-[0.9] tracking-tighter text-foreground">
+              I build things.
+            </h2>
+          </RevealLine>
 
-        {/* Animated stats bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-16 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-0"
-        >
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{
-                duration: 0.6,
-                delay: 0.4 + i * 0.1,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className={`group flex flex-col items-center py-6 transition-colors ${
-                i < stats.length - 1
-                  ? "md:border-r md:border-white/10"
-                  : ""
-              }`}
-            >
-              <span className="mb-1 font-mono text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-                <AnimatedCounter
-                  target={stat.value}
-                  suffix={stat.suffix}
-                  isInView={isInView}
-                />
+          <RevealLine delay={0.12}>
+            <p className="max-w-md text-lg leading-relaxed text-foreground/35 md:text-xl">
+              Not to practice. Not for grades.
+            </p>
+          </RevealLine>
+
+          <RevealLine delay={0.2}>
+            <h2 className="text-[clamp(3rem,8vw,7rem)] font-extrabold leading-[0.9] tracking-tighter">
+              <span className="bg-gradient-to-r from-foreground via-foreground/70 to-foreground/30 bg-clip-text text-transparent">
+                To ship.
               </span>
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground/50 transition-colors group-hover:text-muted-foreground/80">
-                {stat.label}
+            </h2>
+          </RevealLine>
+
+          <Note delay={0.25}>10+ projects deployed to production</Note>
+
+          {/* Origin story */}
+          <div className="space-y-1 pt-6">
+            <RevealLine>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                Started coding three years ago.
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.06}>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                Started an agency one year in.
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.12}>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                <span className="font-semibold text-foreground/85">ZStudios</span>
+                {" "}— real clients, real deadlines,
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.18}>
+              <p className="text-[clamp(1.75rem,4.5vw,3rem)] font-bold tracking-tight text-foreground/90">
+                real stakes.
+              </p>
+            </RevealLine>
+          </div>
+
+          <Note>University of Alberta · 3rd year CS</Note>
+
+          {/* Philosophy */}
+          <div className="space-y-1 pt-6">
+            <RevealLine>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                I think in systems,
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.06}>
+              <p className="text-xl leading-relaxed text-foreground/50 md:text-2xl">
+                build in sprints,
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.12}>
+              <h3 className="text-[clamp(1.75rem,5vw,3.5rem)] font-bold tracking-tight text-foreground">
+                and ship in weeks.
+              </h3>
+            </RevealLine>
+          </div>
+
+          {/* Tech — not badges, just quiet confident text */}
+          <RevealLine direction="left">
+            <div className="flex flex-wrap gap-x-8 gap-y-3 py-10">
+              {["React", "Python", "TypeScript", "Blockchain", "Automation", "Full-stack"].map(
+                (tech) => (
+                  <span
+                    key={tech}
+                    className="font-mono text-[13px] tracking-widest text-foreground/20 transition-colors duration-300 hover:text-foreground/60 md:text-sm"
+                  >
+                    {tech}
+                  </span>
+                )
+              )}
+            </div>
+          </RevealLine>
+
+          {/* Closing */}
+          <div className="pt-4">
+            <RevealLine>
+              <p className="max-w-lg text-lg italic text-foreground/25 md:text-xl">
+                The code is the easy part.
+              </p>
+            </RevealLine>
+            <RevealLine delay={0.1}>
+              <h3 className="mt-2 max-w-3xl text-[clamp(1.75rem,4.5vw,3rem)] font-bold leading-[1.1] tracking-tight text-foreground">
+                Understanding the problem —
+                <br />
+                that&apos;s where the real work happens.
+              </h3>
+            </RevealLine>
+          </div>
+
+          {/* Currently — live indicator */}
+          <RevealLine delay={0.15}>
+            <div className="flex items-center gap-3 pt-12">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
               </span>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Bento grid */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {bentoCards.map((card, i) => (
-            <motion.div
-              key={card.id}
-              custom={i}
-              variants={cardVariants}
-              initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
-              className={card.span}
-            >
-              <SpotlightCard
-                spotlightColor={card.spotlightColor}
-                className="h-full rounded-3xl border border-white/[0.08] bg-white/[0.02] p-7 backdrop-blur-sm transition-all duration-500 hover:border-white/20 hover:bg-white/[0.04] md:p-8"
-              >
-                {/* Gradient accent */}
-                <div
-                  className={`pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br ${card.gradient} opacity-0 transition-opacity duration-700 group-hover:opacity-100`}
-                />
-
-                {/* Icon */}
-                <div className="relative mb-6 flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] transition-all duration-300 group-hover:border-white/20 group-hover:bg-white/[0.08]">
-                    <span className="font-mono text-lg font-bold text-white/80 transition-colors group-hover:text-white">
-                      {card.icon}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold tracking-tight text-white md:text-2xl">
-                    {card.label}
-                  </h3>
-                </div>
-
-                {/* Body */}
-                <p className="relative text-[14px] leading-[1.8] text-white/50 transition-colors duration-300 group-hover:text-white/70 md:text-[15px]">
-                  {card.text}
-                </p>
-
-                {/* Decorative corner line */}
-                <div className="absolute bottom-0 right-0 h-20 w-20 overflow-hidden rounded-br-3xl">
-                  <div className="absolute bottom-3 right-3 h-px w-8 bg-gradient-to-l from-white/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                  <div className="absolute bottom-3 right-3 h-8 w-px bg-gradient-to-t from-white/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                </div>
-              </SpotlightCard>
-            </motion.div>
-          ))}
+              <span className="font-mono text-[12px] tracking-wide text-foreground/30">
+                Currently building with Next.js &amp; shipping ZStudios projects
+              </span>
+            </div>
+          </RevealLine>
         </div>
       </div>
     </section>
