@@ -420,7 +420,7 @@ export function ChatAssistant({
                   placeholder="Ask something..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  className="flex-1 bg-transparent text-sm text-foreground placeholder-muted-foreground/30 outline-none"
+                  className="flex-1 bg-transparent text-base text-foreground placeholder-muted-foreground/30 outline-none"
                 />
                 <button
                   type="submit"
