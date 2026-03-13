@@ -64,11 +64,13 @@ function ContactForm({ isInView }: { isInView: boolean }) {
   const [message, setMessage] = useState("")
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
+  const [error, setError] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name || !email || !message) return
     setSending(true)
+    setError(false)
     
     try {
       const res = await fetch("https://formspree.io/f/mojkw0re", {
@@ -90,14 +92,10 @@ function ContactForm({ isInView }: { isInView: boolean }) {
         setEmail("")
         setMessage("")
       } else {
-        const subject = `Portfolio Contact: Message from ${name}`
-        const body = `${message}%0A%0A----%0AFrom: ${name}%0AEmail: ${email}`
-        window.location.href = `mailto:znafi@ualberta.ca?subject=${encodeURIComponent(subject)}&body=${body}`
+        setError(true)
       }
     } catch {
-      const subject = `Portfolio Contact: Message from ${name}`
-      const body = `${message}%0A%0A----%0AFrom: ${name}%0AEmail: ${email}`
-      window.location.href = `mailto:znafi@ualberta.ca?subject=${encodeURIComponent(subject)}&body=${body}`
+      setError(true)
     } finally {
       setSending(false)
     }
@@ -162,6 +160,11 @@ function ContactForm({ isInView }: { isInView: boolean }) {
               <Send className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               {sending ? "Sending…" : "Send message"}
             </button>
+            {error && (
+              <p className="text-sm text-red-500">
+                Failed to send message. Please try again or email me directly at znafi@ualberta.ca
+              </p>
+            )}
           </motion.form>
         )}
       </AnimatePresence>
