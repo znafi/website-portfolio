@@ -225,7 +225,6 @@ export function ChatAssistant({
   useEffect(() => {
     if (open) {
       scrollToBottom()
-      inputRef.current?.focus()
     }
   }, [open, scrollToBottom])
 
