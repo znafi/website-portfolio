@@ -86,15 +86,19 @@ function ContactForm({ isInView }: { isInView: boolean }) {
         }),
       })
       
+      console.log('Formspree response status:', res.status)
+      
       if (res.ok) {
         setSent(true)
         setName("")
         setEmail("")
         setMessage("")
       } else {
+        console.error('Formspree error:', await res.text())
         setError(true)
       }
-    } catch {
+    } catch (err) {
+      console.error('Form submission error:', err)
       setError(true)
     } finally {
       setSending(false)
